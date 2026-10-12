@@ -60,4 +60,22 @@ public class Incident {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void update(
+            String title,
+            String description,
+            IncidentStatus status
+    ) {
+        if (title != null) {
+            this.title = title;
+        }
+
+        if (description != null) {
+            this.description = description;
+        }
+
+        if (status != null) {
+            this.status = status;
+        }
+    }
 }

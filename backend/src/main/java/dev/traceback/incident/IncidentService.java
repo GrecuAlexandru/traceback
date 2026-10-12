@@ -1,6 +1,7 @@
 package dev.traceback.incident;
 
 import dev.traceback.incident.dto.CreateIncidentRequest;
+import dev.traceback.incident.dto.UpdateIncidentRequest;
 import dev.traceback.incident.dto.IncidentResponse;
 
 import org.springframework.data.domain.Sort;
@@ -43,5 +44,32 @@ public class IncidentService {
     public Optional<IncidentResponse> getIncident(UUID id) {
         return repository.findById(id)
                 .map(IncidentResponse::fromEntity);
+    }
+
+    @Transactional
+    public Optional<IncidentResponse> updateIncident(UUID id, UpdateIncidentRequest request) {
+
+        return repository.findById(id)
+                .map(incident -> {
+
+                    incident.update(
+                            request.title(),
+                            request.description(),
+                            request.status()
+                    );
+
+                    return IncidentResponse.fromEntity(incident);
+                });
+    }
+
+    @Transactional
+    public boolean deleteIncident(UUID id) {
+
+        return repository.findById(id)
+                .map(incident -> {
+                    repository.delete(incident);
+                    return true;
+                })
+                .orElse(false);
     }
 }
