@@ -1,0 +1,158 @@
+{
+  "timestamp_utc": "2026-10-13T14:42:15.731862+00:00",
+  "passed": true,
+  "http_checks": [
+    {
+      "name": "human_signature_issuer_audience_validation",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "name": "human_create_organization",
+      "status": 201,
+      "expected": 201
+    },
+    {
+      "name": "human_list_organizations",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "name": "human_create_incident",
+      "status": 201,
+      "expected": 201
+    },
+    {
+      "name": "human_retrieve_incident",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "name": "service_signature_issuer_audience_validation",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "name": "service_list_organizations_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "service_create_organization_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "service_list_incidents_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "service_retrieve_incident_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "service_create_incident_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "service_update_incident_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "service_delete_incident_denied",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "name": "missing_authentication",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "name": "malformed_authentication",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "name": "invalid_signature",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "name": "wrong_audience_identity_rejected",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "name": "wrong_audience_organizations_rejected",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "name": "wrong_audience_incidents_rejected",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "name": "human_cleanup_incident",
+      "status": 204,
+      "expected": 204
+    }
+  ],
+  "claim_checks": {
+    "human": {
+      "issuer_matches": true,
+      "audience_matches": true,
+      "client_matches": true,
+      "classification_matches": true,
+      "subject_present": true,
+      "not_expired": true
+    },
+    "service_account": {
+      "issuer_matches": true,
+      "audience_matches": true,
+      "client_matches": true,
+      "classification_matches": true,
+      "subject_present": true,
+      "not_expired": true
+    },
+    "wrong_audience": {
+      "issuer_matches": true,
+      "audience_matches": true,
+      "client_matches": true,
+      "classification_matches": true,
+      "subject_present": true,
+      "not_expired": true,
+      "api_audience_absent": true
+    }
+  },
+  "test_data": {
+    "organization_retained_until_disposable_database_removal": true,
+    "incident_cleanup_succeeded": true,
+    "created_counts": {
+      "app_users": 1,
+      "organizations": 1,
+      "memberships": 1,
+      "incidents": 1
+    },
+    "disposable_backend_stopped": true,
+    "disposable_database_removed": true,
+    "persistent_application_database_modified": false
+  },
+  "pkce_enforcement": {
+    "missing_challenge": {
+      "status": 302,
+      "oauth_error": "invalid_request",
+      "no_authorization_code": true
+    },
+    "plain_method": {
+      "status": 302,
+      "oauth_error": "invalid_request",
+      "no_authorization_code": true
+    }
+  }
+}

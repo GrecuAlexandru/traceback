@@ -1,11 +1,12 @@
 # Traceback — Development Roadmap
 
-**Last source review:** GitHub `main`, 2026-10-13. Review local changes before acting.  
+**Last source review:** Local `main`, 2026-10-13, M9A/M9B approved for local development; local Keycloak follow-up verified; M10 implemented locally and pending review.
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
 
 - **Code present:** implementation found in GitHub; runtime/tests may still require verification.
+- **Implemented locally; review pending:** Local code and verification exist; user acceptance is still required.
 - **Next:** the next milestone to implement.
 - **Planned:** not implemented or not verified as complete.
 - **Accepted:** tests, demonstration, security checks, and user review completed; only mark after evidence is available.
@@ -16,11 +17,11 @@
 - Incident CRUD, filtering/pagination, optimistic locking and `409 Conflict` handling.
 - PostgreSQL and Flyway V1/V2.
 - JWT resource-server configuration and authenticated identity endpoint.
-- Testcontainers/MockMvc test code; **passing tests not independently confirmed in this document**.
+- Original Testcontainers/MockMvc baseline: 11 tests passed during M9A preflight; final suite: 27 passing tests. See [M9A verification](M9A_ORGANIZATIONS.md#verification).
 
-**Preflight before Milestone 9A:** Verify tests; reconcile Keycloak local setup against the committed Compose file; check the Flyway migration location; ensure root `.env` files cannot be committed. Fix only confirmed blockers in a narrowly scoped change.
+**M9A preflight completed:** The original 11 tests passed. Local Compose already includes PostgreSQL and Keycloak on loopback, OIDC discovery matches the configured issuer, and Flyway already uses `classpath:db/migration`. V3 already exists and remains immutable. Root secret ignore rules now also cover nested/variant `.env` files.
 
-## M9A — Users, organizations, memberships — NEXT
+## M9A — Users, organizations, memberships — APPROVED for local development
 
 **Deliver:**
 
@@ -33,7 +34,9 @@
 
 **Acceptance:** Users can only list their memberships; failures leave no orphaned organizations; existing incident rows and prior migrations are untouched; all relevant tests pass. **Do not** claim incident tenant isolation yet.
 
-## M9B — Tenant-scoped incidents and RBAC — PLANNED
+**Implemented:** Application identity and membership entities, authenticated `POST`/`GET /api/v1/organizations`, atomic administrator bootstrap, a fail-closed trusted-human claim policy, concurrency-safe identity insertion, and PostgreSQL tests for isolation, roles, validation, constraints, forced rollback, concurrent first use, and V2-to-V3 data preservation. No migration was edited or added because V3 already supplies the required schema. See [M9A_ORGANIZATIONS.md](M9A_ORGANIZATIONS.md) for API details and verification evidence. Approved by the user for local development. The separate [local Keycloak follow-up](LOCAL_KEYCLOAK_SMOKE.md) now verifies real human/service-account tokens and dedicated mappers; this is not production identity-provider/deployment verification.
+
+## M9B — Tenant-scoped incidents and RBAC — APPROVED for local development
 
 **Deliver:**
 
@@ -45,11 +48,15 @@
 
 **Acceptance:** A user from organization A cannot see, update, delete, enumerate, or search organization B's incidents. Unauthorized access fails without leaking data. Only after this gate may the API be considered for public exposure.
 
-## M10 — Knowledge base and document metadata — PLANNED
+**Implemented locally:** Append-only V4 preserves legacy incidents with NULL ownership, enforces ownership for new writes, and adds the foreign key/indexes. Scoped CRUD/list/filter/count queries and SQL write predicates enforce persisted membership and ADMIN/ENGINEER/VIEWER permissions; global routes are denied. PATCH and DELETE retain atomic version conflict checks. Regression, role/tenant, legacy, migration, direct service/repository, rollback, and concurrent-write tests are present. See [M9B_INCIDENT_TENANCY.md](M9B_INCIDENT_TENANCY.md) for the contract and actual verification results: `clean test` and `verify` each passed all 45 tests on Java 21 with no failures/errors/skips. The user approved M9B for local development. The separate [local Keycloak smoke test](LOCAL_KEYCLOAK_SMOKE.md) now verifies signed human/CLI tokens and real wrong-audience rejection using a disposable backend/database. Milestone 10 is now implemented locally and pending review; see its record below.
+
+## M10 — Knowledge base and document management — IMPLEMENTED LOCALLY; REVIEW PENDING
 
 **Deliver:** Organization-owned document records, versions, upload status, source metadata, size/type limits, lifecycle API, and safe deletion behavior. Begin with PDF (text-based), Markdown, and TXT.
 
 **Acceptance:** Only authorized users can list/download/manage their documents; file validation and version-history tests pass. No AI required yet.
+
+**Implemented locally:** Organization-scoped PDF/Markdown/TXT uploads; validated bounded content, measured size and SHA-256; immutable revision attempt history; pagination/status filtering; version-aware title/revision/deletion operations; private POSIX storage behind a small adapter; crash/failure compensation and startup cleanup; current membership/RBAC checks in services and scoped SQL; composite tenant foreign keys; tombstone deletion blocking all historical downloads. Append-only V5 preserves V1–V4 and existing data. No extraction, ingestion, AI, cloud or frontend was added. Storage/runtime is deliberately single-process. See [M10_DOCUMENT_MANAGEMENT.md](M10_DOCUMENT_MANAGEMENT.md) for API examples, final verification evidence, recovery/deletion policy and limits. Final `clean test` and `verify` each passed 79 tests with zero failures/errors/skips; the M10 record includes build verification. User acceptance remains pending; M11 has not begun.
 
 ## M11 — Durable ingestion with AWS S3/SQS — PLANNED
 

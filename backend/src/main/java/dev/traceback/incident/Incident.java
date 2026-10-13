@@ -3,6 +3,7 @@ package dev.traceback.incident;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.Objects;
 
 @Entity
 @Table(name = "incidents")
@@ -11,6 +12,10 @@ public class Incident {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    // Nullable only for pre-V4 quarantined rows; the database rejects new null owners.
+    @Column(name = "organization_id", updatable = false)
+    private UUID organizationId;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -33,7 +38,8 @@ public class Incident {
 
     }
 
-    public Incident(String title, String description) {
+    public Incident(UUID organizationId, String title, String description) {
+        this.organizationId = Objects.requireNonNull(organizationId);
         this.title = title;
         this.description = description;
     }
@@ -47,6 +53,10 @@ public class Incident {
 
     public UUID getId() {
         return id;
+    }
+
+    public UUID getOrganizationId() {
+        return organizationId;
     }
 
     public String getTitle() {

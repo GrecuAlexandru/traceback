@@ -29,3 +29,6 @@ Expose read-only MCP tools through the same application services and authorizati
 ## Implementation status
 
 **PLANNED only.** JWT-backed incident CRUD exists; no RAG or MCP implementation found in the verified baseline.
+
+
+**CURRENT M10 foundation:** Document/revision tenant ownership, immutable source IDs/checksums, membership checks before content reads and deletion tombstones are implemented. Future retrieval must exclude deleted documents and authorize sources before context assembly. No retrieval, LLM or MCP code is present.

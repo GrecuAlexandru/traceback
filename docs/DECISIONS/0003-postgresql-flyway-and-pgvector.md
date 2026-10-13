@@ -25,5 +25,11 @@ Use PostgreSQL as the system of record. Apply schema changes through immutable, 
 
 ## Implementation status
 
-**CURRENT:** PostgreSQL via Docker, JPA, Flyway V1/V2, Testcontainers test code.  
-**PLANNED:** pgvector embeddings, full-text/hybrid search, schema evolution for organizations/documents.
+**CURRENT:** PostgreSQL via Docker, JPA, Flyway V1/V2/V3/V4, Testcontainers tests. M9A maps the existing V3 schema without editing it; a V2-to-V3 upgrade test preserves incident fields and version. Identity insertion uses PostgreSQL `ON CONFLICT (issuer, subject) DO NOTHING` inside a READ_COMMITTED transaction to avoid aborting concurrent first-use requests.
+
+M9B appends V4 without editing prior migrations. NULL legacy ownership remains quarantined behind a NOT VALID check; new inserts/updates require a real organization FK. Tenant/status/date indexes support scoped lists. Permission predicates are included in reads/counts and mutations; SQL UPDATE/DELETE compare expected versions atomically. A V3-to-V4 upgrade test preserves legacy fields and verifies constraints. Final legacy assignment/archive and NOT NULL validation remain a separate reviewed operation.
+
+**PLANNED:** pgvector embeddings, full-text/hybrid search and future ingestion schema evolution.
+
+
+**CURRENT M10:** Append-only V5 creates tenant-owned documents and immutable content revision attempts with composite foreign keys, checks, unique/index constraints and a revision-update trigger. Explicit JDBC mapping and row locks serve the two-phase upload workflow; metadata version and content revision number are distinct. V4→V5 tests preserve incidents/users/organizations/memberships. Existing JPA validation remains enabled; V1–V4 are unchanged.

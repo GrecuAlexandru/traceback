@@ -1,1 +1,10 @@
-/.env
+# Local environment files and credentials (at any repository depth)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python smoke-test tooling
+__pycache__/
+*.py[cod]

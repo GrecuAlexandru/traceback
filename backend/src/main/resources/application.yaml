@@ -24,3 +24,14 @@ spring:
           audiences:
             - traceback-api
 
+  servlet:
+    multipart:
+      max-file-size: ${traceback.documents.max-file-size-bytes}B
+      max-request-size: ${DOCUMENT_MAX_REQUEST_SIZE:11MB}
+      file-size-threshold: 0
+
+traceback:
+  documents:
+    # Private POSIX directory outside the checkout; never mount as static content.
+    storage-directory: ${DOCUMENT_STORAGE_DIRECTORY:${user.home}/.local/share/traceback/documents}
+    max-file-size-bytes: ${DOCUMENT_MAX_FILE_SIZE_BYTES:10485760}

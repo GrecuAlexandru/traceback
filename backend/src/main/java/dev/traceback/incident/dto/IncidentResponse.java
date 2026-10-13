@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record IncidentResponse(
     UUID id,
+    UUID organizationId,
     String title,
     String description,
     IncidentStatus status,
@@ -18,6 +19,7 @@ public record IncidentResponse(
     public static IncidentResponse fromEntity(Incident incident) {
         return new IncidentResponse(
                 incident.getId(),
+                incident.getOrganizationId(),
                 incident.getTitle(),
                 incident.getDescription(),
                 incident.getStatus(),

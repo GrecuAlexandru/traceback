@@ -24,5 +24,8 @@ Use one Java/Spring Boot codebase organized by business feature. Controllers, se
 
 ## Implementation status
 
-**CURRENT:** Single Spring Boot application with incident/security/API packages.  
+**CURRENT:** Single Spring Boot application with incident/security/API/user/organization packages. M9A organization controllers delegate to transactional services and repositories.
 **PLANNED:** Ingestion worker runtime and AI-specific modules.
+
+
+**CURRENT M10:** The `knowledge` feature package owns thin HTTP controllers, application services, explicit JDBC persistence records, DTOs, validation, upload recovery and a small private storage interface. No worker runtime or new service was introduced.

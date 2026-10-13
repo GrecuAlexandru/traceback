@@ -35,6 +35,8 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
+                        // Retired global routes cannot become a fallback or redirect bypass.
+                        .requestMatchers("/api/v1/incidents", "/api/v1/incidents/**").denyAll()
                         .anyRequest().authenticated()
                 )
 

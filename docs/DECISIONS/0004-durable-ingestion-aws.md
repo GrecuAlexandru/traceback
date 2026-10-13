@@ -27,3 +27,6 @@ Store original documents privately in S3. Persist document metadata, processing 
 ## Implementation status
 
 **PLANNED only.** No S3/SQS worker pipeline in the verified repository baseline.
+
+
+**CURRENT M10 precursor:** Original files are stored privately by a local POSIX adapter with pending/available/failed metadata and startup reconciliation. A storage interface provides the later S3 extension point. This does not implement the S3/SQS/outbox ingestion target, text extraction or a distributed worker. See [M10](../M10_DOCUMENT_MANAGEMENT.md).
