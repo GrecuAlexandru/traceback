@@ -98,7 +98,8 @@ class IncidentApiIntegrationTest {
         String request = """
         {
             "title": "Updated title",
-            "status": "INVESTIGATING"
+            "status": "INVESTIGATING",
+            "version": 0
         }
         """;
 
@@ -107,7 +108,8 @@ class IncidentApiIntegrationTest {
                         .content(request))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated title"))
-                .andExpect(jsonPath("$.status").value("INVESTIGATING"));
+                .andExpect(jsonPath("$.status").value("INVESTIGATING"))
+                .andExpect(jsonPath("$.version").value(1));
 
         Incident updated = repository.findById(id).orElseThrow();
 
@@ -171,7 +173,7 @@ class IncidentApiIntegrationTest {
         mockMvc.perform(patch("/api/v1/incidents/{id}", missingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                {"status": "RESOLVED"}
+                {"status": "RESOLVED", "version": 0}
                 """))
                 .andExpect(status().isNotFound());
 
@@ -215,5 +217,71 @@ class IncidentApiIntegrationTest {
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.items[0].title").value("Investigating incident"))
                 .andExpect(jsonPath("$.items[0].status").value("INVESTIGATING"));
+    }
+
+
+    @Test
+    void shouldRejectStaleIncidentUpdate() throws Exception {
+
+        Incident incident = repository.save(
+                new Incident("Original title", "Original description")
+        );
+
+        UUID id = incident.getId();
+        long originalVersion = incident.getVersion();
+
+        String firstUpdate = """
+        {
+            "status": "RESOLVED",
+            "version": %d
+        }
+        """.formatted(originalVersion);
+
+        mockMvc.perform(patch("/api/v1/incidents/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(firstUpdate))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("RESOLVED"))
+                .andExpect(jsonPath("$.version")
+                        .value(originalVersion + 1));
+
+        String staleUpdate = """
+        {
+            "title": "Outdated edit",
+            "version": %d
+        }
+        """.formatted(originalVersion);
+
+        mockMvc.perform(patch("/api/v1/incidents/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(staleUpdate))
+                .andExpect(status().isConflict());
+
+        Incident current = repository.findById(id).orElseThrow();
+
+        assertEquals("Original title", current.getTitle());
+        assertEquals(IncidentStatus.RESOLVED, current.getStatus());
+        assertEquals(originalVersion + 1, current.getVersion());
+    }
+
+
+    @Test
+    void shouldRejectUpdateWithoutVersion() throws Exception {
+
+        Incident incident = repository.save(
+                new Incident("Example", "Test description")
+        );
+
+        mockMvc.perform(patch(
+                        "/api/v1/incidents/{id}",
+                        incident.getId()
+                )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+            {
+                "status": "RESOLVED"
+            }
+            """))
+                .andExpect(status().isBadRequest());
     }
 }

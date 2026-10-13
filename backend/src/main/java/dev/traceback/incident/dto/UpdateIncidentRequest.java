@@ -1,7 +1,9 @@
 package dev.traceback.incident.dto;
 
 import dev.traceback.incident.IncidentStatus;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 public record UpdateIncidentRequest (
@@ -13,5 +15,9 @@ public record UpdateIncidentRequest (
     @Pattern(regexp = "(?s).*\\S.*", message = "Description must not be blank")
     String description,
 
-    IncidentStatus status
+    IncidentStatus status,
+
+    @NotNull
+    @PositiveOrZero
+    Long version
 ) {}

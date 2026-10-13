@@ -11,6 +11,7 @@ public record IncidentResponse(
     String title,
     String description,
     IncidentStatus status,
+    long version,
     Instant createdAt
 ) {
 
@@ -20,6 +21,7 @@ public record IncidentResponse(
                 incident.getTitle(),
                 incident.getDescription(),
                 incident.getStatus(),
+                incident.getVersion(),
                 incident.getCreatedAt()
         );
     }

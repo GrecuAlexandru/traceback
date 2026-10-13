@@ -67,11 +67,17 @@ public class IncidentService {
         return repository.findById(id)
                 .map(incident -> {
 
+                    if (incident.getVersion() != request.version()) {
+                        throw new IncidentVersionConflictException();
+                    }
+
                     incident.update(
                             request.title(),
                             request.description(),
                             request.status()
                     );
+
+                    repository.flush();
 
                     return IncidentResponse.fromEntity(incident);
                 });

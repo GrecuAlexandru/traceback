@@ -22,6 +22,10 @@ public class Incident {
     @Column(nullable = false, length = 32)
     private IncidentStatus status = IncidentStatus.OPEN;
 
+    @Version
+    @Column(nullable = false)
+    private long version;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -55,6 +59,10 @@ public class Incident {
 
     public IncidentStatus getStatus() {
         return status;
+    }
+
+    public long getVersion() {
+        return version;
     }
 
     public Instant getCreatedAt() {
