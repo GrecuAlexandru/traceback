@@ -14,4 +14,13 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/traceback
+          audiences:
+            - traceback-api
+

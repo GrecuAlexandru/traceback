@@ -23,6 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @Testcontainers
 @SpringBootTest
@@ -64,7 +65,7 @@ class IncidentApiIntegrationTest {
         }
         """;
 
-        mockMvc.perform(post("/api/v1/incidents")
+        mockMvc.perform(post("/api/v1/incidents").with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated())
@@ -78,7 +79,7 @@ class IncidentApiIntegrationTest {
         assertNotNull(saved.getId());
         assertEquals("Database failure", saved.getTitle());
 
-        mockMvc.perform(get("/api/v1/incidents/{id}", saved.getId()))
+        mockMvc.perform(get("/api/v1/incidents/{id}", saved.getId()).with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Database failure"))
                 .andExpect(jsonPath("$.description")
@@ -104,6 +105,7 @@ class IncidentApiIntegrationTest {
         """;
 
         mockMvc.perform(patch("/api/v1/incidents/{id}", id)
+                        .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isOk())
@@ -134,12 +136,12 @@ class IncidentApiIntegrationTest {
 
         UUID id = incident.getId();
 
-        mockMvc.perform(delete("/api/v1/incidents/{id}", id))
+        mockMvc.perform(delete("/api/v1/incidents/{id}", id).with(jwt()))
                 .andExpect(status().isNoContent());
 
         assertFalse(repository.existsById(id));
 
-        mockMvc.perform(get("/api/v1/incidents/{id}", id))
+        mockMvc.perform(get("/api/v1/incidents/{id}", id).with(jwt()))
                 .andExpect(status().isNotFound());
     }
 
@@ -154,7 +156,7 @@ class IncidentApiIntegrationTest {
         }
         """;
 
-        mockMvc.perform(post("/api/v1/incidents")
+        mockMvc.perform(post("/api/v1/incidents").with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest());
@@ -167,17 +169,17 @@ class IncidentApiIntegrationTest {
 
         UUID missingId = UUID.randomUUID();
 
-        mockMvc.perform(get("/api/v1/incidents/{id}", missingId))
+        mockMvc.perform(get("/api/v1/incidents/{id}", missingId).with(jwt()))
                 .andExpect(status().isNotFound());
 
-        mockMvc.perform(patch("/api/v1/incidents/{id}", missingId)
+        mockMvc.perform(patch("/api/v1/incidents/{id}", missingId).with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                 {"status": "RESOLVED", "version": 0}
                 """))
                 .andExpect(status().isNotFound());
 
-        mockMvc.perform(delete("/api/v1/incidents/{id}", missingId))
+        mockMvc.perform(delete("/api/v1/incidents/{id}", missingId).with(jwt()))
                 .andExpect(status().isNotFound());
     }
 
@@ -188,7 +190,7 @@ class IncidentApiIntegrationTest {
             repository.save(new Incident("Incident" + i, "Test description"));
         }
 
-        mockMvc.perform(get("/api/v1/incidents")
+        mockMvc.perform(get("/api/v1/incidents").with(jwt())
                     .param("page", "1")
                     .param("size", "3"))
                 .andExpect(status().isOk())
@@ -211,7 +213,7 @@ class IncidentApiIntegrationTest {
 
         repository.saveAndFlush(investigating);
 
-        mockMvc.perform(get("/api/v1/incidents")
+        mockMvc.perform(get("/api/v1/incidents").with(jwt())
                         .param("status", "INVESTIGATING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1))
@@ -237,7 +239,7 @@ class IncidentApiIntegrationTest {
         }
         """.formatted(originalVersion);
 
-        mockMvc.perform(patch("/api/v1/incidents/{id}", id)
+        mockMvc.perform(patch("/api/v1/incidents/{id}", id).with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(firstUpdate))
                 .andExpect(status().isOk())
@@ -252,7 +254,7 @@ class IncidentApiIntegrationTest {
         }
         """.formatted(originalVersion);
 
-        mockMvc.perform(patch("/api/v1/incidents/{id}", id)
+        mockMvc.perform(patch("/api/v1/incidents/{id}", id).with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(staleUpdate))
                 .andExpect(status().isConflict());
@@ -276,6 +278,7 @@ class IncidentApiIntegrationTest {
                         "/api/v1/incidents/{id}",
                         incident.getId()
                 )
+                        .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
             {
@@ -284,4 +287,41 @@ class IncidentApiIntegrationTest {
             """))
                 .andExpect(status().isBadRequest());
     }
+
+
+    @Test
+    void shouldRejectUnauthenticatedRequests() throws Exception {
+
+        mockMvc.perform(get("/api/v1/incidents"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/v1/incidents")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                    "title": "Unauthorized incident",
+                    "description": "Should not be created"
+                }
+                """))
+                .andExpect(status().isUnauthorized());
+
+        assertEquals(0, repository.count());
+    }
+
+
+    @Test
+    void shouldReturnAuthenticatedIdentity() throws Exception {
+
+        mockMvc.perform(get("/api/v1/me")
+                        .with(jwt().jwt(token -> token
+                                .subject("test-user-123")
+                                .claim("preferred_username", "demo-engineer")
+                        )))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subject")
+                        .value("test-user-123"))
+                .andExpect(jsonPath("$.username")
+                        .value("demo-engineer"));
+    }
+
 }
