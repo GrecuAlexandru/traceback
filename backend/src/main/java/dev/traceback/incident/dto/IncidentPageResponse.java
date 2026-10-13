@@ -9,7 +9,7 @@ public record IncidentPageResponse(
         List<IncidentResponse> items,
         int page,
         int size,
-        long totalItems,
+        long totalElements,
         int totalPages,
         boolean hasNext
 ) {

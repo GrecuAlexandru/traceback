@@ -190,12 +190,12 @@ class IncidentApiIntegrationTest {
                     .param("page", "1")
                     .param("size", "3"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.incidents.length()").value(3))
+                .andExpect(jsonPath("$.items.length()").value(3))
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.size").value(3))
                 .andExpect(jsonPath("$.totalPages").value(3))
                 .andExpect(jsonPath("$.totalElements").value(7))
-                .andExpect(jsonPath("$.hasNext").value(true));;
+                .andExpect(jsonPath("$.hasNext").value(true));
     }
 
     @Test
