@@ -3,7 +3,11 @@ package dev.traceback.incident;
 import dev.traceback.incident.dto.CreateIncidentRequest;
 import dev.traceback.incident.dto.UpdateIncidentRequest;
 import dev.traceback.incident.dto.IncidentResponse;
+import dev.traceback.incident.dto.IncidentPageResponse;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +38,23 @@ public class IncidentService {
         return IncidentResponse.fromEntity(saved);
     }
 
-    public List<IncidentResponse> getAllIncidents() {
-        return repository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
-                .stream()
-                .map(IncidentResponse::fromEntity)
-                .toList();
+    public IncidentPageResponse getIncidents(
+            IncidentStatus status,
+            int page,
+            int size
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
+
+        Page<Incident> result;
+
+        if (status == null) {
+            result = repository.findAll(pageable);
+        } else {
+            result = repository.findByStatus(status, pageable);
+        }
+
+        return IncidentPageResponse.fromPage(result);
     }
 
     public Optional<IncidentResponse> getIncident(UUID id) {

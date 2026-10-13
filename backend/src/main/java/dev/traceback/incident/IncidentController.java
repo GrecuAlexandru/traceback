@@ -3,11 +3,15 @@ package dev.traceback.incident;
 import dev.traceback.incident.dto.CreateIncidentRequest;
 import dev.traceback.incident.dto.UpdateIncidentRequest;
 import dev.traceback.incident.dto.IncidentResponse;
+import dev.traceback.incident.dto.IncidentPageResponse;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
@@ -37,8 +41,20 @@ public class IncidentController {
     }
 
     @GetMapping
-    public List<IncidentResponse> getAll() {
-        return service.getAllIncidents();
+    public IncidentPageResponse getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) IncidentStatus status
+    ) {
+
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Page must be >= 0 and size must be between 1 and 100"
+            );
+        }
+
+        return service.getIncidents(status, page, size);
     }
 
     @GetMapping("/{id}")

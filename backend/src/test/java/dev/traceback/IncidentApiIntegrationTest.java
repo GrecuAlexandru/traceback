@@ -179,4 +179,41 @@ class IncidentApiIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void shouldPaginateIncidents() throws Exception {
+
+        for (int i = 0; i < 7; i++) {
+            repository.save(new Incident("Incident" + i, "Test description"));
+        }
+
+        mockMvc.perform(get("/api/v1/incidents")
+                    .param("page", "1")
+                    .param("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.incidents.length()").value(3))
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.size").value(3))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.totalElements").value(7))
+                .andExpect(jsonPath("$.hasNext").value(true));;
+    }
+
+    @Test
+    void shouldFilterIncidentsByStatus() throws Exception {
+
+        repository.save(new Incident("Open incident", "Decription"));
+
+        Incident investigating = repository.save(new Incident("Investigating incident", "Description"));
+
+        investigating.update(null, null, IncidentStatus.INVESTIGATING);
+
+        repository.saveAndFlush(investigating);
+
+        mockMvc.perform(get("/api/v1/incidents")
+                        .param("status", "INVESTIGATING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("Investigating incident"))
+                .andExpect(jsonPath("$.items[0].status").value("INVESTIGATING"));
+    }
 }
