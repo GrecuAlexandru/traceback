@@ -14,7 +14,7 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/
+    locations: classpath:db/migration
 
   security:
     oauth2:
