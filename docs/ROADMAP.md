@@ -1,6 +1,6 @@
 # Traceback — Development Roadmap
 
-**Last source review:** Local `codex/m12-extraction-retrieval`, 2026-10-14; M9A–M11 approved for local development; M12 implemented locally, milestone review pending.
+**Last source review:** Local `codex/m13-rag-chat`, 2026-10-14; M9A–M13 approved for local development by the M14 request; M14 verified locally (221 tests); review pending.
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
@@ -79,7 +79,7 @@ work, tenant UUID forgery and a separate scheduled Java worker. See [M11_DURABLE
 for exact final commands, build evidence and emulator limitations. VERIFIED is preparation only; no index
 or search existed at the M11 checkpoint. The user approved M11 and authorized M12 on 2026-10-14.
 
-## M12 — Extraction, indexing and hybrid retrieval — IMPLEMENTED LOCALLY; REVIEW PENDING
+## M12 — Extraction, indexing and hybrid retrieval — APPROVED for local development
 
 **Deliver:** Embedding-provider adapter, pgvector schema, full-text search, permission-aware hybrid retrieval, chunk/source references, and an initial evaluation dataset.
 
@@ -87,20 +87,49 @@ or search existed at the M11 checkpoint. The user approved M11 and authorized M1
 
 **Implemented locally:** Resource-constrained isolated PDFBox validation/extraction, UTF-8 Markdown/TXT, deterministic source-aware chunks, real local nomic v1.5 embeddings through Spring AI 2.0.1/Ollama, append-only V7 pgvector/full-text schema, typed M11 outbox/SQS indexing events, renewable fenced leases, extraction checkpoints, retries/recovery, atomic generation publication, safe reindex/backfill commands and organization-scoped keyword/cosine/RRF APIs. Current-revision/tombstone/membership filtering occurs inside SQL before top-K. Defaults require explicit model/indexing enablement; no private data leaves local configured inference.
 
-**Evidence:** Final `clean test` and `verify` each passed 152 tests with no failures/errors/skips; complete build evidence is recorded in [M12](M12_EXTRACTION_AND_RETRIEVAL.md). The separate real-model evaluation uses five synthetic documents/ten chunks and ten labeled exact/paraphrase queries per tenant: Recall@5/MRR@5 0.60/0.60 keyword, 1.00/1.00 semantic and hybrid, zero foreign results. Dataset and actual observations are saved under `evaluations/m12/`; these do not establish production quality. ADR-0007 and local downloads were approved before implementation. M12 milestone acceptance remains pending; do not start M13.
+**Evidence:** Final `clean test` and `verify` each passed 152 tests with no failures/errors/skips; complete build evidence is recorded in [M12](M12_EXTRACTION_AND_RETRIEVAL.md). The separate real-model evaluation uses five synthetic documents/ten chunks and ten labeled exact/paraphrase queries per tenant: Recall@5/MRR@5 0.60/0.60 keyword, 1.00/1.00 semantic and hybrid, zero foreign results. Dataset and actual observations are saved under `evaluations/m12/`; these do not establish production quality. ADR-0007 and local downloads were approved before implementation. The user approved M12 for local development in the M13 request. Historical M12 verification/results remain unchanged.
 
 
-## M13 — Grounded AI chat and tools — PLANNED
+## M13 — Grounded persistent AI chat — APPROVED for local development
 
-**Deliver:** Spring AI chat, conversation persistence, bounded context, controlled tool calling, validated citations, insufficient-evidence behavior, timeouts, and usage/cost tracking.
+**Deliver:** Private organization/creator-scoped conversations, durable ordered/idempotent turns,
+local Spring AI/Ollama chat, bounded M12 hybrid context, validated real citations, canonical abstention,
+transitive historical source invalidation, failure/deadline/admission handling and safe operational metrics.
+No tool calling or streaming is implemented; both require later scope/authorization review.
 
-**Acceptance:** Answers cite only authorized real sources, invalid citations are rejected, and the assistant abstains when evidence is absent. Tests cover provider failures.
+**Acceptance:** Authorized users can continue persistent conversations; references resolve only to live
+permitted sources; deleted/superseded/revoked evidence cannot bypass historical visibility; failures/retries
+and concurrent submissions are safe; deterministic tests and real local model observations are documented.
+See [M13_RAG_CHAT.md](M13_RAG_CHAT.md) and [ADR-0008](DECISIONS/0008-private-conversations-and-validated-rag-evidence.md).
+**Local synthetic quality checkpoint completed:** The approved pinned 7B model, batch 64,
+four CPU threads and 120-second bound produced six supported answers/four abstentions,
+10/10 expected statuses, zero foreign leakage and 9/9 valid citations. Manual complete
+citation support was 6/6 accepted answers. This tiny benchmark is not a production accuracy
+claim. CPU turns take roughly 52–97 seconds; a 60-second bound was insufficient. The earlier
+1.5B/OOM/timeout observations are retained. Final regression evidence is recorded in M13;
+the M14 request approves M13 locally. Historical evaluation evidence remains unchanged.
 
-## M14 — MCP server and client — PLANNED
+## M14 — Secure read-only MCP — IMPLEMENTED LOCALLY; REVIEW PENDING
 
-**Deliver:** Authenticated, read-only MCP tools backed by the same application services and tenant checks as REST; a restricted, demonstrable external MCP client integration.
+**Deliver:** Disabled-by-default stateless Streamable HTTP `/mcp` with six explicit read-only
+organization, incident, document, search and exact-source tools. Reuse existing services and
+SQL authorization, propagate the original validated caller JWT across thread changes, enforce
+separate MCP resource-URI versus REST audience validation, and bound transport/tool resources.
+No MCP session persistence, schema migration, write tools, prompts, resources or chat generation.
 
-**Acceptance:** Tool discovery and normal requests work; missing auth, invalid audience, denied organization access, and suspicious tool inputs are rejected; independent client smoke test recorded.
+**Security:** Protected-resource metadata, header-only bearer authentication, strict loopback
+Host/Origin guards, generic errors, request/result limits, concurrency/deadline/rate admission
+and fixed-cardinality metrics. Existing Keycloak stays unchanged; approved disposable Keycloak
+26.8 enables experimental resource indicators for real Code + PKCE/client-credentials tests.
+The official Java SDK client initializes, discovers and invokes all six tools. Tests include
+foreign IDs, visibility, revocation, concurrent identities, session reuse, negative tokens and
+independent REST behavior. The requested M13 marker correction preserves normal Markdown.
+
+**Profile and evidence:** Spring AI 2.0.1 / official SDK 2.0.0 negotiate through 2025-11-25;
+2026-07-28, automatic client registration and browser Inspector CORS are not claimed. See
+[M14_SECURE_MCP.md](M14_SECURE_MCP.md) for exact final commands/results, schemas, client setup,
+security review and remaining limits; [ADR-0009](DECISIONS/0009-stateless-read-only-mcp.md)
+records transport/OAuth decisions. Stop for M14 review; do not start M15.
 
 ## M15 — AI safety and quality evaluation — PLANNED
 

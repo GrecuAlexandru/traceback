@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
+    @org.springframework.core.annotation.Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, @org.springframework.beans.factory.annotation.Value("${traceback.runtime:api}") String runtime) throws Exception {
         if (runtime.equals("worker")) {

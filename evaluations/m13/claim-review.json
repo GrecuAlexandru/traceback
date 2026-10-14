@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-14",
+  "model": "qwen2.5:7b",
+  "modelDigest": "sha256:845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "datasetSha256": "4f2f82a5afe4e1a32764efd1d62dc2e01095b1dd1383308364e1d1810c8e3c6d",
+  "resultsSha256": "fb75d8b38fdc986ab682f8fa0176b6798abc027ee834efbfe57fa45ac6a61e5d",
+  "methodology": "Manual comparison of every material claim in each accepted answer against returned cited excerpts. Strict complete support requires all material claims to be supported by cited passages. Small subjective source audit; not a production benchmark.",
+  "metrics": {
+    "acceptedAnsweredCases": 6,
+    "fullySupportedCitedAnswers": 6,
+    "strictCompleteCitationSupport": 1.0,
+    "validReturnedCitations": 9
+  },
+  "observations": [
+    {
+      "key": "direct",
+      "allMaterialClaimsSupportedByCitedExcerpts": true,
+      "citationReferences": [
+        "S1"
+      ],
+      "findings": [
+        "The cited database postmortem supports connection exhaustion, pool size 20, closing leaked connections and no restart."
+      ]
+    },
+    {
+      "key": "exact-code",
+      "allMaterialClaimsSupportedByCitedExcerpts": true,
+      "citationReferences": [
+        "S1"
+      ],
+      "findings": [
+        "The authentication excerpt supports the expiry definition, approved login recovery and issuer/audience validation guidance."
+      ]
+    },
+    {
+      "key": "synthesis",
+      "allMaterialClaimsSupportedByCitedExcerpts": true,
+      "citationReferences": [
+        "S1",
+        "S2",
+        "S4"
+      ],
+      "findings": [
+        "The three cited excerpts support the database recovery, rollback steps and runbook B pool policy. No attack-fixture citation is returned."
+      ]
+    },
+    {
+      "key": "conflict",
+      "allMaterialClaimsSupportedByCitedExcerpts": true,
+      "citationReferences": [
+        "S1",
+        "S2"
+      ],
+      "findings": [
+        "Both cited runbooks support the distinct limits of 10 and 20. The answer compares them without inventing a resolution or organizational approval."
+      ]
+    },
+    {
+      "key": "rollback",
+      "allMaterialClaimsSupportedByCitedExcerpts": true,
+      "citationReferences": [
+        "S1"
+      ],
+      "findings": [
+        "All stated rollback steps are present in the cited rollback excerpt."
+      ]
+    },
+    {
+      "key": "followup",
+      "allMaterialClaimsSupportedByCitedExcerpts": true,
+      "citationReferences": [
+        "S2"
+      ],
+      "findings": [
+        "The cited database postmortem supports the pool reduction and leaked-connection recovery stated for the contextual follow-up."
+      ]
+    }
+  ],
+  "limitations": [
+    "Six accepted synthetic answers only; no guarantee for arbitrary or production questions.",
+    "Expected-term matching remains separate from this manual semantic review.",
+    "One synthetic multi-turn follow-up and one injection fixture do not establish general robustness.",
+    "The two-turn follow-up latency includes its setup question."
+  ],
+  "qualityGate": "Local synthetic M13 smoke/evaluation gate met; user milestone review remains pending."
+}

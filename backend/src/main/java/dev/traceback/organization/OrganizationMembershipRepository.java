@@ -27,5 +27,9 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
             ORDER BY o.createdAt DESC, o.id DESC
             """)
     List<OrganizationResponse> findOrganizationsForIdentity(@Param("issuer") String issuer,
-                                                          @Param("subject") String subject);
+            @Param("subject") String subject, org.springframework.data.domain.Pageable pageable);
+
+    default List<OrganizationResponse> findOrganizationsForIdentity(String issuer, String subject) {
+        return findOrganizationsForIdentity(issuer, subject, org.springframework.data.domain.Pageable.unpaged());
+    }
 }

@@ -29,7 +29,7 @@ Use a standard OIDC identity provider (Keycloak locally) and Spring Security OAu
 
 **CURRENT local integration:** `traceback-web-test` is a public Code + required S256 PKCE client with an exact loopback callback and dedicated access-token human/audience mappers. Machine/exchange grants are disabled. `traceback-cli` remains unchanged and lacks the human claim. Real human bootstrap/incident access, CLI 403 denial, invalid-signature/missing-token 401, and wrong-audience 401 checks passed against a disposable backend/database. See [local verification](../LOCAL_KEYCLOAK_SMOKE.md).
 
-**PLANNED:** Authorization for future RAG/MCP modules and separately approved deployment. See [M9B incident tenancy](../M9B_INCIDENT_TENANCY.md).
+**Historical M9 plan:** Extend authorization to RAG/MCP (now implemented through M14 below). Deployment still requires separate approval. See [M9B incident tenancy](../M9B_INCIDENT_TENANCY.md).
 
 
 **CURRENT M10:** Document/revision metadata, counts, downloads and writes reuse the human/membership policy. Read SQL includes tenant and identity predicates; write SQL also checks ADMIN/ENGINEER. Composite foreign keys prevent foreign document/revision pointers. Downloads recheck persisted access immediately before bounded file reads. Tombstones hide current and historical content. JWT and live Keycloak configuration are unchanged. See [M10](../M10_DOCUMENT_MANAGEMENT.md).
@@ -38,3 +38,17 @@ Use a standard OIDC identity provider (Keycloak locally) and Spring Security OAu
 
 
 **CURRENT M12:** Search/status reuse trusted-human identity and current persisted membership. Keyword/vector SQL independently filters organization, issuer/subject membership, active/current revision and published INDEXED generation before ranking/limits. Query embedding follows authorization, with reauthorization after provider I/O. Known foreign IDs, corpus contamination, revocation and tombstones are tested. JWT configuration is unchanged. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).
+
+
+**CURRENT M13:** Private persistent conversations, durable/idempotent ordered turns, bounded local inference and assigned-source citation validation are implemented in `rag` with append-only V8. All supplied and inherited source dependencies are checked against current authorization/publication before generation, finalization and historical reads; invalid historical answers are redacted. No tools or MCP. See [ADR-0008](0008-private-conversations-and-validated-rag-evidence.md) and [M13](../M13_RAG_CHAT.md).
+
+
+**CURRENT M14:** Disabled-by-default, loopback-only stateless MCP exposes six explicit read-only
+tools through existing authorized services. A separate JWT chain requires the canonical MCP
+resource audience while REST retains traceback-api. Original validated JWTs cross threads in
+an immutable request context; no session confers identity. Exact source resolution retains all
+M12/M13 live visibility predicates. Protected-resource metadata, strict limits, fixed-label
+metrics and real isolated Keycloak/official-client tests are provided. M13 citation markers
+reject unsupported dialects while preserving normal Markdown. Earlier implementation notes
+above describe their historical checkpoints. See [ADR-0009](0009-stateless-read-only-mcp.md)
+and [M14](../M14_SECURE_MCP.md) for version/OAuth limitations and actual verification.

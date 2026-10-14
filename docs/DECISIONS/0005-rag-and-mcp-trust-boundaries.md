@@ -28,10 +28,24 @@ Expose read-only MCP tools through the same application services and authorizati
 
 ## Implementation status
 
-**PLANNED only.** JWT-backed incident CRUD exists; no RAG or MCP implementation found in the verified baseline.
+**Historical M9 baseline:** JWT-backed incident CRUD existed; RAG and MCP were planned at that checkpoint. Subsequent implementation notes below record their progression.
 
 
-**CURRENT M10 foundation:** Document/revision tenant ownership, immutable source IDs/checksums, membership checks before content reads and deletion tombstones are implemented. Future retrieval must exclude deleted documents and authorize sources before context assembly. No retrieval, LLM or MCP code is present.
+**M10 checkpoint:** Document/revision tenant ownership, immutable source IDs/checksums, membership checks before content reads and deletion tombstones are implemented. Future retrieval must exclude deleted documents and authorize sources before context assembly. No retrieval, LLM or MCP code is present.
 
 
-**CURRENT M12 retrieval foundation:** Authorized full-text/cosine/RRF retrieval, compatible local query embeddings, bounded real-source references, current/tombstone filtering and a synthetic real-model evaluation are implemented. Untrusted content remains inert. RAG context assembly, generated answers and MCP remain PLANNED; no such endpoints exist. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).
+**M12 checkpoint:** Authorized full-text/cosine/RRF retrieval, compatible local query embeddings, bounded real-source references, current/tombstone filtering and a synthetic real-model evaluation are implemented. Untrusted content remains inert. RAG context assembly, generated answers and MCP remain PLANNED; no such endpoints exist. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).
+
+
+**M13 checkpoint:** Private persistent conversations, durable/idempotent ordered turns, bounded local inference and assigned-source citation validation are implemented in `rag` with append-only V8. All supplied and inherited source dependencies are checked against current authorization/publication before generation, finalization and historical reads; invalid historical answers are redacted. No tools or MCP. See [ADR-0008](0008-private-conversations-and-validated-rag-evidence.md) and [M13](../M13_RAG_CHAT.md).
+
+
+**CURRENT M14:** Disabled-by-default, loopback-only stateless MCP exposes six explicit read-only
+tools through existing authorized services. A separate JWT chain requires the canonical MCP
+resource audience while REST retains traceback-api. Original validated JWTs cross threads in
+an immutable request context; no session confers identity. Exact source resolution retains all
+M12/M13 live visibility predicates. Protected-resource metadata, strict limits, fixed-label
+metrics and real isolated Keycloak/official-client tests are provided. M13 citation markers
+reject unsupported dialects while preserving normal Markdown. Earlier implementation notes
+above describe their historical checkpoints. See [ADR-0009](0009-stateless-read-only-mcp.md)
+and [M14](../M14_SECURE_MCP.md) for version/OAuth limitations and actual verification.

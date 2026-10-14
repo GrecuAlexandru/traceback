@@ -1,12 +1,12 @@
 # Traceback — Architecture
 
 **Document status:** Living technical specification.  
-**Baseline inspected:** Local `codex/m12-extraction-retrieval`, 2026-10-14; M9A–M11 approved for local development; M12 architecture approved and implemented locally, milestone review pending.
+**Baseline inspected:** Local `codex/m13-rag-chat`, 2026-10-14; M9A–M13 approved for local development; M14 implemented and verified locally (221 tests); M14 review pending.
 **Rule:** Sections labeled **CURRENT** describe code found in the repository; **PLANNED** sections are not implemented claims.
 
 ## 1. Purpose
 
-Traceback is a technical incident and engineering-knowledge platform. Teams will record incidents and resolutions, ingest runbooks and postmortems, find similar failures, and ask an AI assistant for evidence-backed investigation suggestions. A secured MCP server will make selected knowledge tools available to other AI clients.
+Traceback is a technical incident and engineering-knowledge platform. Teams will record incidents and resolutions, ingest runbooks and postmortems, find similar failures, and ask an AI assistant for evidence-backed investigation suggestions. A local secured MCP server exposes selected read-only knowledge tools to other AI clients.
 
 The product must remain useful without AI: incident management, knowledge storage, authorization, and conventional search are first-class features.
 
@@ -18,8 +18,9 @@ The product must remain useful without AI: incident management, knowledge storag
 - **Documents (M10):** Organization-scoped upload/list/metadata/title update/download/revision history/tombstone deletion; ADMIN/ENGINEER writes, VIEWER reads. Validated PDF/Markdown/TXT with measured limits and SHA-256. V5 adds documents and immutable revision attempts with composite tenant foreign keys. A private POSIX storage adapter uses opaque keys, atomic promotion, file/directory fsync and safe startup recovery; database/filesystem locks permit one API writer per database/root; M11 workers use read-only legacy access. See [M10_DOCUMENT_MANAGEMENT.md](M10_DOCUMENT_MANAGEMENT.md) for contracts, consistency and limitations. PDF validation now runs in M12’s isolated parser; extraction/indexing is described below.
 - **Ingestion (M11):** Explicit LOCAL/S3 revision storage, private conditional S3 writes, PostgreSQL job/outbox records, leased concurrent SQS dispatch, independently executable worker verification, token-fenced idempotent completion, bounded retries/DLQ and recovery. VERIFIED means bytes/size/SHA-256 checked, never extracted/indexed. V6 preserves all old revisions as LOCAL. Tenant-scoped status and internal Actuator/Micrometer operations are available. See [M11_DURABLE_INGESTION.md](M11_DURABLE_INGESTION.md).
 - **Retrieval (M12):** Separate extraction/index generations, private source artifacts, deterministic section/page-aware chunks, real local Ollama/Spring AI embeddings, pgvector cosine and PostgreSQL full-text/RRF search. Atomic head publication prevents partial/mixed output; live tenant/membership/current-revision/tombstone SQL filters govern every result. See [M12 implementation and evaluation](M12_EXTRACTION_AND_RETRIEVAL.md).
-- **Persistence:** PostgreSQL; Flyway V1/V2 for incidents and the pre-existing `V3__create_organizations_and_users.sql` for users, organizations, and memberships; append-only V4 adds incident ownership, a foreign key, tenant indexes, and a NOT VALID ownership check that preserves unassigned legacy rows but rejects new unowned writes. Hibernate schema validation remains enabled. V1–V6 are unchanged by M12; append-only V7 adds pgvector, owned derived generations/artifacts, full-text indexes, publication invariants and typed indexing events. No automatic source migration/backfill.
-- **Authentication:** Spring Security OAuth2 resource server with JWT issuer `http://localhost:8180/realms/traceback` and expected audience `traceback-api`; `/api/v1/ping` and `/actuator/health` are public.
+- **MCP (M14):** Disabled-by-default stateless Streamable HTTP `/mcp`, six explicit read-only tools, independent Keycloak resource-URI audience, protected-resource metadata, strict Host/Origin/body/argument/output/admission limits, explicit per-request original JWT propagation and shared service/SQL authorization. No MCP session, write, resource, prompt or chat-generation API. Spring AI 2.0.1 transport/official SDK 2.0.0 support through protocol 2025-11-25; newer 2026 protocol support is deferred. See [M14](M14_SECURE_MCP.md) and [ADR-0009](DECISIONS/0009-stateless-read-only-mcp.md).
+- **Persistence:** PostgreSQL; Flyway V1/V2 for incidents and the pre-existing `V3__create_organizations_and_users.sql` for users, organizations, and memberships; append-only V4 adds incident ownership, a foreign key, tenant indexes, and a NOT VALID ownership check that preserves unassigned legacy rows but rejects new unowned writes. Hibernate schema validation remains enabled. V1–V6 are unchanged by M12; append-only V7 adds pgvector, owned derived generations/artifacts, full-text indexes, publication invariants and typed indexing events. No automatic source migration/backfill. M13 appends V8 without changing V1–V7 or original knowledge data.
+- **Authentication:** Spring Security OAuth2 resource server with JWT issuer `http://localhost:8180/realms/traceback` and REST expected audience `traceback-api`; MCP has a separate decoder requiring its configured canonical resource URI; `/api/v1/ping` and `/actuator/health` are public.
 - **Organizations:** Application users keyed by `(issuer, subject)`; `ADMIN`/`ENGINEER`/`VIEWER` memberships; atomic creation with an initial administrator; listing joins only the authenticated identity's memberships. PostgreSQL `ON CONFLICT DO NOTHING` and an explicit `READ_COMMITTED` transaction handle concurrent first use. Listing does not provision users.
 - **M10 verification:** Final `clean test` and `verify` each passed all 79 tests (45 existing + 34 document/storage/migration tests), with no failures/errors/skips; see the M10 verification record for build evidence. New real HTTP coverage verifies servlet multipart 413 formatting; other document authorization requests use synthetic principals.
 - **M11 verification:** `clean test` and `verify` each passed 106 tests with zero failures/errors/skips, including disposable LocalStack/PostgreSQL failure tests and a separate scheduled Java worker process. Final build evidence is recorded in [M11](M11_DURABLE_INGESTION.md).
@@ -63,17 +64,17 @@ Spring Boot API  <---->  OIDC identity provider
 | `ingestion` (current M11/M12) | Durable preparation jobs, outbox, retries, leases, idempotent content verification | Synchronous long-running HTTP work |
 | `extraction` / `indexing` (current M12) | Resource-isolated PDF parsing, deterministic chunks, local embeddings, durable generations/publication | Untrusted content executed as instructions |
 | `search` (current M12) | Keyword/vector/hybrid search with permission filters | Returning raw unauthorized chunks |
-| `rag` (planned) | Retrieval orchestration, prompt assembly, citations, evaluation | Authorization delegated to the LLM |
-| `mcp` (planned) | Secure tools/resources backed by services | Separate bypass of business permissions |
+| `rag` (current M13) | Private conversations, durable turns, bounded hybrid context, local chat, source/citation validation and historical redaction | Authorization delegated to the LLM, tool execution |
+| `mcp` (current M14) | Explicit read-only stateless tools, resource-specific JWT security, protocol boundaries, limits and metrics | Write tools, authorization sessions, alternate business/data access paths |
 
 Use feature packages with controllers/services/repositories/DTOs rather than giant global technical-layer packages. Do not couple the domain model directly to provider SDKs.
 
-## 5. Identity, tenancy, and authorization (CURRENT M9A/M9B/M10; AI tenancy PLANNED)
+## 5. Identity, tenancy, and authorization (CURRENT M9A/M9B/M10; RAG tenancy CURRENT M13; MCP CURRENT M14)
 
 - Keycloak/OIDC authenticates principals. Application users are identified by **issuer + subject**.
 - A user may be a member of multiple organizations with different roles: `ADMIN`, `ENGINEER`, `VIEWER`.
 - Memberships and organization permissions live in PostgreSQL, not in trusted client-supplied fields.
-- **CURRENT:** Every new incident has explicit organization ownership; unassigned pre-V4 incidents are inaccessible. **CURRENT M10:** Documents and immutable revisions have mandatory organization ownership and scoped authorization. **CURRENT M12:** Chunks/embeddings/search use composite ownership and live membership/source filters inside retrieval SQL. **PLANNED:** Chats require the same tenant boundaries. **CURRENT M11:** Ingestion jobs/events have composite tenant FKs, worker reference checks and tenant-authorized status reads.
+- **CURRENT:** Every new incident has explicit organization ownership; unassigned pre-V4 incidents are inaccessible. **CURRENT M10:** Documents and immutable revisions have mandatory organization ownership and scoped authorization. **CURRENT M12:** Chunks/embeddings/search use composite ownership and live membership/source filters inside retrieval SQL. **CURRENT M13:** Private conversations/messages/citations enforce organization, creator and live membership SQL; historical assistant evidence is revalidated/redacted. **CURRENT M11:** Ingestion jobs/events have composite tenant FKs, worker reference checks and tenant-authorized status reads.
 - Resolve and authorize organization context **before** all reads, writes, retrieval, downloads, and MCP actions.
 - Prefer URLs of the form `/api/v1/organizations/{orgId}/incidents`. Do not leave an unscoped legacy incident endpoint as a security bypass.
 - Deny by default. Return consistent 401/403/404 responses without revealing private incident existence across tenants.
@@ -111,17 +112,19 @@ See [M11 lifecycle, operations and limits](M11_DURABLE_INGESTION.md) and [ADR-00
 
 **CURRENT M12:** Enabled VERIFIED completion creates durable indexing work/event atomically. Isolated PDFBox extraction (network disabled, bounded memory/CPU/time/tmpfs, verified cgroup v2 limits), strict UTF-8 text extraction and source-aware chunking precede local Ollama embeddings. Indexing has renewable 90-second token leases, 30-second database/SQS heartbeats and a ten-minute per-claim deadline. Checkpointed extraction survives provider retry; complete chunks/vectors/head publish atomically. Tombstone/supersession, stale ownership and failed reindex cannot expose invalid content. Historical derived artifacts remain private. See [M12](M12_EXTRACTION_AND_RETRIEVAL.md) and [ADR-0007](DECISIONS/0007-isolated-extraction-and-index-generations.md).
 
-**PLANNED:** RAG answers, MCP, physical purge, presigned uploads and cloud deployment.
+**CURRENT M13:** Non-streaming RAG chat is implemented; see below. **CURRENT M14:** Read-only MCP is implemented locally. **PLANNED:** Physical purge, presigned uploads and cloud deployment.
 
-## 8. Search (CURRENT M12), AI and MCP (PLANNED)
+## 8. Search and RAG (CURRENT M12/M13), MCP (CURRENT M14)
 
-- **CURRENT M12:** Organization-scoped keyword/semantic/hybrid search and authorized revision indexing status; bounded source snippets and source IDs; current membership and live source filters inside SQL. Hybrid uses RRF and explicit keyword fallback on local provider failure. No generated answers exist. The real 768-dimensional nomic v1.5 evaluation measured Recall@5/MRR@5 0.60/0.60 keyword, 1.00/1.00 semantic and hybrid, with zero foreign results on ten synthetic queries/chunks; this is small-sample smoke evidence.
+- **CURRENT M12:** Organization-scoped keyword/semantic/hybrid search and authorized revision indexing status; bounded source snippets and source IDs; current membership and live source filters inside SQL. Hybrid uses RRF and explicit keyword fallback on local provider failure. M13 adds generated answers through the separate `rag` feature; M12 search remains independently usable. The real 768-dimensional nomic v1.5 evaluation measured Recall@5/MRR@5 0.60/0.60 keyword, 1.00/1.00 semantic and hybrid, with zero foreign results on ten synthetic queries/chunks; this is small-sample smoke evidence.
+- **CURRENT M13:** V8 adds private creator-owned conversations, ordered user/assistant messages, durable idempotent turns and composite source dependencies. Separate pinned local Ollama chat uses the existing Spring AI dependency; model/provider/context/output/time/concurrency are bounded. No DB locks or transactions span inference. All supplied/uncited/inherited sources are revalidated before transmission/finalization/return and every historical read; unavailable/current-head changes redact whole answers. Strict JSON/assigned-reference validation proves provenance/access, not semantic support. No tools or streaming. See [M13](M13_RAG_CHAT.md) and [ADR-0008](DECISIONS/0008-private-conversations-and-validated-rag-evidence.md).
+- **CURRENT M13 local model evidence:** Approved pinned qwen2.5:7b/Q4_K_M with bounded batch 64/four threads and a 120-second deadline completed the ten-case synthetic suite: six supported answers, four abstentions, no foreign leakage, nine valid citations and six manually supported cited answers. The runtime is capped at 8 GiB/four CPUs; single-turn CPU latency was 52–97 seconds. These are small-sample local observations, not production quality claims; earlier 1.5B, OOM and shorter-timeout failures are retained.
 - **CURRENT local limits:** One API writer; PDF operations require trusted Docker orchestration/cgroup v2; embedding/indexing is opt-in with a pinned local model. No production exposure/deployment claim.
 - Retrieval stages: tenant/permission filtering -> keyword and/or vector retrieval -> hybrid ranking -> verified source selection -> LLM response -> citation validation.
 - Start with PostgreSQL full-text search and pgvector; benchmark before introducing approximate indexes or rerankers.
 - Responses must identify supporting sources and explicitly abstain when evidence is insufficient. Claims of accuracy require a reproducible evaluation dataset.
 - Treat documents, user uploads, retrieval snippets, and MCP tool output as **untrusted data**. Prevent prompt injection from modifying system policy or causing unauthorized actions.
-- MCP tools initially read-only (for example `search_incidents`, `get_incident`, `search_knowledge`). Use the **same** tenant authorization services as REST endpoints.
+- **CURRENT M14:** `traceback_list_organizations`, `traceback_search_knowledge`, `traceback_get_document`, `traceback_get_source`, `traceback_list_incidents`, `traceback_get_incident` use the same application services and live database authorization as REST. Exact source reads reuse the M12/M13 resolver. Untrusted prose is separated from authoritative source metadata. MCP-only tokens fail REST and REST-only tokens fail MCP, including alternate route attempts. No persistent MCP state or new migration.
 - No automatic production remediation or arbitrary shell execution by the assistant.
 
 ## 9. Local development and verification
@@ -143,3 +146,12 @@ A local Keycloak instance or equivalent OIDC issuer is required for real-token t
 No payment system, mobile app, Kubernetes, Kafka, autonomous remediation, multi-region deployment, or unrestricted agent execution. A clean Java backend, verifiable RAG/MCP integrations, and reliable ingestion matter more than broad features.
 
 For milestones and acceptance criteria, see [ROADMAP.md](ROADMAP.md). For trade-offs, see [DECISIONS/README.md](DECISIONS/README.md).
+
+**M14 local identity verification:** The approved disposable Keycloak 26.8 fixture enables
+experimental resource indicators and uses a separate realm, pre-registered Code + S256
+PKCE human clients and a machine negative-test client. The official MCP SDK client
+initializes and calls all six tools against real HTTP; PostgreSQL authorization, concurrent
+identities, session-header reuse, revocation, tombstones and negative tokens are exercised.
+Existing Compose Keycloak and persistent databases remain unchanged. Complete final build
+evidence and client/OAuth limitations are recorded in [M14](M14_SECURE_MCP.md). No newer
+2026 protocol, universal automatic OAuth, browser Inspector CORS or deployment claim is made.

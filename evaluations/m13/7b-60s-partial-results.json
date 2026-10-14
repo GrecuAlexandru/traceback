@@ -1,0 +1,42 @@
+{
+  "model": "qwen2.5:7b",
+  "modelDigest": "sha256:845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "datasetSha256": "4f2f82a5afe4e1a32764efd1d62dc2e01095b1dd1383308364e1d1810c8e3c6d",
+  "batchSize": 64,
+  "threads": 4,
+  "timeoutSeconds": 60,
+  "runStatus": "Interrupted after supported synthesis/conflict cases hit the configured deadline; repeated with a 120-second bound.",
+  "observations": [
+    {
+      "key": "direct",
+      "status": "ANSWERED",
+      "latencyMs": 46079
+    },
+    {
+      "key": "exact-code",
+      "status": "ANSWERED",
+      "latencyMs": 46822
+    },
+    {
+      "key": "synthesis",
+      "status": "FAILED",
+      "latencyMs": 60271
+    },
+    {
+      "key": "conflict",
+      "status": "FAILED",
+      "latencyMs": 60246
+    },
+    {
+      "key": "rollback",
+      "status": "ANSWERED",
+      "latencyMs": 54136
+    },
+    {
+      "key": "followup",
+      "status": "FAILED",
+      "latencyMs": 60239
+    }
+  ],
+  "limitations": "Partial operational observations only. Raw answers and semantic citation support were not captured for this interrupted run."
+}

@@ -43,6 +43,13 @@ public class OrganizationService {
         return OrganizationResponse.from(organization, MembershipRole.ADMIN);
     }
 
+    public List<OrganizationResponse> listMine(Jwt jwt, @jakarta.validation.constraints.Min(1)
+            @jakarta.validation.constraints.Max(101) int limit) {
+        var identity = identityPolicy.requireHuman(jwt);
+        return memberships.findOrganizationsForIdentity(identity.issuer(), identity.subject(),
+                org.springframework.data.domain.PageRequest.of(0, limit));
+    }
+
     public List<OrganizationResponse> listMine(Jwt jwt) {
         HumanIdentityPolicy.Identity identity = identityPolicy.requireHuman(jwt);
         return memberships.findOrganizationsForIdentity(identity.issuer(), identity.subject());

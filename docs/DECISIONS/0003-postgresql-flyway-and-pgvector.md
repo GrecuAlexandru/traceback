@@ -38,3 +38,6 @@ M9B appends V4 without editing prior migrations. NULL legacy ownership remains q
 
 
 **CURRENT M12:** Append-only V7 adds pgvector and composite-owned derived artifacts/generations, immutable configuration/dimension metadata, simple full-text GIN indexes and a complete-publication head trigger. Exact cosine avoids premature approximate-index optimization. V1–V6 are unchanged; upgrade tests preserve existing revisions/jobs/events. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).
+
+
+**CURRENT M13:** Private persistent conversations, durable/idempotent ordered turns, bounded local inference and assigned-source citation validation are implemented in `rag` with append-only V8. All supplied and inherited source dependencies are checked against current authorization/publication before generation, finalization and historical reads; invalid historical answers are redacted. No tools or MCP. See [ADR-0008](0008-private-conversations-and-validated-rag-evidence.md) and [M13](../M13_RAG_CHAT.md).

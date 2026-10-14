@@ -27,7 +27,7 @@ class IndexMigrationIntegrationTest {
         String before=jdbc.queryForObject("SELECT row_to_json(r)::text FROM document_revisions r",String.class);
         String jobBefore=jdbc.queryForObject("SELECT to_jsonb(j)::text FROM ingestion_jobs j",String.class);
         String eventBefore=jdbc.queryForObject("SELECT to_jsonb(o)::text FROM ingestion_outbox o",String.class);
-        var latest=Flyway.configure().dataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword()).locations("classpath:db/migration").load();
+        var latest=Flyway.configure().dataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword()).locations("classpath:db/migration").target("7").load();
         assertEquals(1,latest.migrate().migrationsExecuted);latest.validate();assertEquals(before,jdbc.queryForObject("SELECT row_to_json(r)::text FROM document_revisions r",String.class));
         assertEquals(jobBefore,jdbc.queryForObject("SELECT to_jsonb(j)::text FROM ingestion_jobs j",String.class));
         assertEquals(eventBefore,jdbc.queryForObject("SELECT (to_jsonb(o)-'event_type'-'index_generation_id')::text FROM ingestion_outbox o",String.class));

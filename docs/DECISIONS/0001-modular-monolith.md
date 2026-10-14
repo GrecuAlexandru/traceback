@@ -34,3 +34,6 @@ Use one Java/Spring Boot codebase organized by business feature. Controllers, se
 
 
 **CURRENT M12:** New extraction/indexing/search feature packages extend the same codebase. A minimal standalone PDFBox artifact runs in constrained containers; API and existing worker remain the runtime roles. No separate service/job platform was introduced. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).
+
+
+**CURRENT M13:** Private persistent conversations, durable/idempotent ordered turns, bounded local inference and assigned-source citation validation are implemented in `rag` with append-only V8. All supplied and inherited source dependencies are checked against current authorization/publication before generation, finalization and historical reads; invalid historical answers are redacted. No tools or MCP. See [ADR-0008](0008-private-conversations-and-validated-rag-evidence.md) and [M13](../M13_RAG_CHAT.md).

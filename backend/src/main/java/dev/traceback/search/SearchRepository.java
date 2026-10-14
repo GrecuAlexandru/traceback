@@ -39,6 +39,13 @@ public class SearchRepository {
             """+SCOPE+" AND c.configuration_id=:configuration ORDER BY e.embedding <=> :vector::vector,c.generation_id,c.id LIMIT :count",
                 scope(org,identity,count).addValue("vector",EmbeddingProvider.literal(vector)).addValue("configuration",configuration),this::candidate);
     }
+    /** Independently resolve an exact current published source after provider I/O or for stored citations. */
+    public Optional<Candidate> resolve(UUID org,Identity identity,UUID document,UUID revision,UUID generation,UUID chunk,String configuration) {
+        var rows=jdbc.query("SELECT c.*,d.title,cfg.model,cfg.dimensions,0.0 AS score "+FROM+" WHERE "+SCOPE+
+            " AND c.document_id=:doc AND c.revision_id=:rev AND c.generation_id=:gen AND c.id=:chunk AND c.configuration_id=:config",
+            scope(org,identity,1).addValue("doc",document).addValue("rev",revision).addValue("gen",generation).addValue("chunk",chunk).addValue("config",configuration),this::candidate);
+        return rows.stream().findFirst();
+    }
     private Candidate candidate(java.sql.ResultSet r,int n)throws java.sql.SQLException {
         String text=r.getString("content");
         return new Candidate(r.getObject("document_id",UUID.class),r.getObject("revision_id",UUID.class),r.getObject("id",UUID.class),r.getObject("generation_id",UUID.class),

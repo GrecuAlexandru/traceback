@@ -1,0 +1,58 @@
+{
+  "date" : "2026-10-14",
+  "datasetSha256" : "4f2f82a5afe4e1a32764efd1d62dc2e01095b1dd1383308364e1d1810c8e3c6d",
+  "protocol" : "rag-json-v2",
+  "schema" : "answered-nonempty-references|abstention-empty-v1",
+  "promptSha256" : "43e944304324df06224b108d2759a904b393a2dc3c35ccf55d8cf4b068fb4493",
+  "provider" : "real local Ollama / Spring AI 2.0.1",
+  "chatConfiguration" : {
+    "enabled" : true,
+    "model" : "qwen2.5:7b",
+    "digest" : "sha256:845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+    "contextTokens" : 8192,
+    "outputTokens" : 512,
+    "temperature" : 0.0,
+    "timeoutSeconds" : 60,
+    "concurrent" : 2,
+    "maxQuestionBytes" : 1000,
+    "promptBytes" : 6000,
+    "evidenceBytes" : 3000,
+    "historyBytes" : 1500,
+    "historyMessages" : 8,
+    "retrievalChunks" : 4,
+    "batchSize" : 64,
+    "threads" : 4
+  },
+  "embeddingModel" : "nomic-embed-text:v1.5",
+  "embeddingDigest" : "sha256:0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f",
+  "queries" : 1,
+  "metrics" : {
+    "successfulAnsweredTurns" : 1,
+    "expectedTermMatches" : "1/1",
+    "expectedStatusMatches" : 1,
+    "suppliedEvidenceRecall" : 1.0,
+    "foreignLeaks" : 0,
+    "insufficientEvidence" : "0/0",
+    "failedCases" : 0
+  },
+  "rawSyntheticModelOutputs" : [ "{\n  \"status\": \"ANSWERED\",\n  \"answer\": \"The API returned HTTP 503 because PostgreSQL connections were exhausted after deployment. The team reduced the application connection pool to 20 and closed leaked connections. No database restart was required.\",\n  \"references\": [\"S1\"]\n}" ],
+  "citationValidity" : "Successful answers passed deterministic backend reference and source visibility validation; failures recorded separately",
+  "semanticClaimSupport" : "Requires manual review of saved answers/excerpts; expected term matching is not semantic groundedness",
+  "observations" : [ {
+    "key" : "direct",
+    "kind" : "direct",
+    "question" : "Why did the API return HTTP 503 after deployment?",
+    "status" : "ANSWERED",
+    "answer" : "The API returned HTTP 503 because PostgreSQL connections were exhausted after deployment. The team reduced the application connection pool to 20 and closed leaked connections. No database restart was required. [S1]",
+    "citations" : [ {
+      "source" : "database",
+      "excerpt" : "# Database recovery\n\nThe API returned HTTP 503 because PostgreSQL connections were exhausted after deployment. The team reduced the application connection pool to 20 and closed leaked connections. No database restart was required.",
+      "reference" : "S1"
+    } ],
+    "expectedTermMatch" : true,
+    "suppliedSources" : [ "database", "rollback", "injection", "authentication" ],
+    "suppliedEvidenceRecall" : 1.0,
+    "latencyMs" : 47110
+  } ],
+  "limitations" : [ "Ten synthetic queries; no production accuracy claim", "Mocked JWT decoder, real database authorization", "Generation failures included, never counted as grounded answers", "Prompt injection authority remains enforced by code; model obedience is not guaranteed", "Deletion/supersession/revocation exercised by separate deterministic integration tests" ]
+}

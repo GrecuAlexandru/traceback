@@ -31,6 +31,19 @@ spring:
       file-size-threshold: 0
 
 traceback:
+  mcp:
+    enabled: ${MCP_ENABLED:false}
+    endpoint: ${MCP_ENDPOINT:/mcp}
+    resource: ${MCP_RESOURCE:http://127.0.0.1:8080/mcp}
+    audience: ${MCP_AUDIENCE:${traceback.mcp.resource}}
+    allowed-hosts: localhost,127.0.0.1,[::1]
+    allowed-origins: []
+    max-request-bytes: 16384
+    max-result-bytes: 65536
+    concurrent-requests: 8
+    concurrent-tools: 4
+    requests-per-minute: 120
+    tool-timeout-seconds: 10
   documents:
     # Private POSIX directory outside the checkout; never mount as static content.
     storage-directory: ${DOCUMENT_STORAGE_DIRECTORY:${user.home}/.local/share/traceback/documents}
@@ -57,6 +70,25 @@ traceback:
     digest: ${EMBEDDING_MODEL_DIGEST:sha256:0000000000000000000000000000000000000000000000000000000000000000}
     dimensions: ${EMBEDDING_DIMENSIONS:768}
     timeout-ms: ${EMBEDDING_TIMEOUT_MS:20000}
+  chat:
+    enabled: ${CHAT_ENABLED:false}
+    endpoint: ${CHAT_ENDPOINT:http://127.0.0.1:11436}
+    model: ${CHAT_MODEL:qwen2.5:7b}
+    digest: ${CHAT_MODEL_DIGEST:sha256:0000000000000000000000000000000000000000000000000000000000000000}
+    context-tokens: ${CHAT_CONTEXT_TOKENS:8192}
+    output-tokens: ${CHAT_OUTPUT_TOKENS:512}
+    temperature: ${CHAT_TEMPERATURE:0.0}
+    timeout-seconds: ${CHAT_TIMEOUT_SECONDS:120}
+    concurrent: ${CHAT_MAX_CONCURRENT:2}
+    max-question-bytes: ${CHAT_MAX_QUESTION_BYTES:1000}
+    prompt-bytes: ${CHAT_PROMPT_BYTES:6000}
+    evidence-bytes: ${CHAT_EVIDENCE_BYTES:3000}
+    history-bytes: ${CHAT_HISTORY_BYTES:1500}
+    history-messages: ${CHAT_HISTORY_MESSAGES:8}
+    retrieval-chunks: ${CHAT_RETRIEVAL_CHUNKS:4}
+    min-semantic-similarity: ${CHAT_MIN_SEMANTIC_SIMILARITY:0.5}
+    batch-size: ${CHAT_BATCH_SIZE:64}
+    threads: ${CHAT_THREADS:4}
   runtime: ${TRACEBACK_RUNTIME:api}
   aws:
     enabled: ${LOCAL_AWS_ENABLED:false}
@@ -88,3 +120,10 @@ management:
   health:
     diskspace:
       enabled: false
+
+# SDK diagnostics may contain client-supplied protocol metadata. Application metrics
+# provide bounded operational visibility without bodies, tokens, IDs or queries.
+logging:
+  level:
+    io.modelcontextprotocol.server: OFF
+    org.springframework.ai.mcp.server: OFF
