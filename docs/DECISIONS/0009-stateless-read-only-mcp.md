@@ -1,6 +1,6 @@
 # ADR-0009 — Stateless read-only MCP with an independent OAuth resource
 
-- **Status:** Accepted for the user-requested M14 local implementation; milestone review pending
+- **Status:** Accepted; M14 approved for local development by the M15 request
 - **Date:** 2026-10-14
 - **Extends:** ADR-0001, ADR-0002, ADR-0005, ADR-0007, ADR-0008
 

@@ -52,3 +52,11 @@ metrics and real isolated Keycloak/official-client tests are provided. M13 citat
 reject unsupported dialects while preserving normal Markdown. Earlier implementation notes
 above describe their historical checkpoints. See [ADR-0009](0009-stateless-read-only-mcp.md)
 and [M14](../M14_SECURE_MCP.md) for version/OAuth limitations and actual verification.
+
+**CURRENT M15:** REST preserves issuer discovery, configured signature algorithms and
+`traceback-api` audience validation while explicitly requiring a present, future expiry.
+Actual-filter signed-token tests demonstrated the prior missing-exp policy gap; normal
+Keycloak access tokens already expire. Default not-before clock tolerance is preserved.
+The MCP resource decoder remains independent. A REST-chain 128 KiB mutation body cap and
+validated incident input bounds complement authorization. No identity claims, live realm
+configuration, membership storage or tenant SQL authority changed. See [M15](../M15_SECURITY_AND_EVALUATION.md).

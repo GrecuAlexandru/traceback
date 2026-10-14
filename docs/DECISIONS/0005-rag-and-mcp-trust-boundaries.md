@@ -49,3 +49,9 @@ metrics and real isolated Keycloak/official-client tests are provided. M13 citat
 reject unsupported dialects while preserving normal Markdown. Earlier implementation notes
 above describe their historical checkpoints. See [ADR-0009](0009-stateless-read-only-mcp.md)
 and [M14](../M14_SECURE_MCP.md) for version/OAuth limitations and actual verification.
+
+**CURRENT M15:** CommonMark-aware citation policy closes remaining numbered-namespace
+presentation gaps and invalid historical answers redact on read. Broader retrieval,
+deterministic adversarial/RAG and bounded real-model evaluations remain separate from
+authorization evidence. No model tool execution or permission cache is added. See
+[M15](../M15_SECURITY_AND_EVALUATION.md) and ADR-0008 for policy and measured limitations.

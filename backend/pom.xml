@@ -28,6 +28,9 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+        <!-- Compatible security patches; retain Boot/Spring AI/AWS/MCP release lines. -->
+        <jackson-bom.version>3.1.7</jackson-bom.version>
+        <tomcat.version>11.0.26</tomcat.version>
 	</properties>
     <dependencyManagement>
         <dependencies><dependency>
@@ -36,6 +39,8 @@
         </dependency></dependencies>
     </dependencyManagement>
 	<dependencies>
+        <!-- Parse citation prose using Markdown syntax, including escaped/nested code. -->
+        <dependency><groupId>org.commonmark</groupId><artifactId>commonmark</artifactId><version>0.25.1</version></dependency>
         <!-- Explicit registration: no starter scanning or automatic tool exposure. -->
         <dependency><groupId>org.springframework.ai</groupId><artifactId>mcp-spring-webmvc</artifactId></dependency>
         <dependency><groupId>io.modelcontextprotocol.sdk</groupId><artifactId>mcp-json-jackson3</artifactId><version>2.0.0</version></dependency>

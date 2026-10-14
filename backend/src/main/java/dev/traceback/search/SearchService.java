@@ -17,13 +17,25 @@ public class SearchService {
     private final SearchRepository repository;private final OrganizationAuthorizationService authorization;
     private final DocumentRepository documents;private final EmbeddingProvider embeddings;private final IndexSettings settings;
     private final TransactionTemplate read;
+    private final io.micrometer.core.instrument.MeterRegistry metrics;
     public SearchService(SearchRepository repository,OrganizationAuthorizationService authorization,DocumentRepository documents,
-                         EmbeddingProvider embeddings,IndexSettings settings,PlatformTransactionManager manager) {
+                         EmbeddingProvider embeddings,IndexSettings settings,PlatformTransactionManager manager,
+                         io.micrometer.core.instrument.MeterRegistry metrics) {
         this.repository=repository;this.authorization=authorization;this.documents=documents;this.embeddings=embeddings;this.settings=settings;
+        this.metrics=metrics;
         read=new TransactionTemplate(manager);read.setReadOnly(true);read.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
         read.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);read.setTimeout(5);
     }
     public Response search(Jwt jwt,UUID org,@NotBlank String q,@Min(1) @Max(50) int limit,Mode mode) {
+        long started=System.nanoTime();String label=(mode==null?Mode.hybrid:mode).name();
+        try {
+            var response=performSearch(jwt,org,q,limit,mode);
+            metrics.counter("traceback.search.calls","mode",label,"outcome",response.degradationCode()==null?"success":"degraded").increment();
+            return response;
+        } catch(RuntimeException ex) {metrics.counter("traceback.search.calls","mode",label,"outcome","failed").increment();throw ex;}
+        finally {metrics.timer("traceback.search.duration","mode",label).record(System.nanoTime()-started,java.util.concurrent.TimeUnit.NANOSECONDS);}
+    }
+    private Response performSearch(Jwt jwt,UUID org,String q,int limit,Mode mode) {
         if(StructureChunker.points(q)>256 || q.codePoints().anyMatch(Character::isISOControl)
                 || !q.codePoints().anyMatch(Character::isLetterOrDigit) || q.strip().split("[^\\p{L}\\p{N}_]+").length>16)
             throw new IllegalArgumentException("Invalid search query");

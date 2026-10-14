@@ -141,6 +141,26 @@ class IncidentApiIntegrationTest {
     }
 
     @Test
+    void newDescriptionBoundsProtectWritesWithoutTruncatingLegacyRecords() throws Exception {
+        String description="x".repeat(20001);
+        mvc.perform(post(collection(orgA)).with(human("alice")).contentType("application/json")
+                .content("{\"title\":\"Large\",\"description\":\""+description+"\"}"))
+                .andExpect(status().isBadRequest());
+        assertEquals(0,ownedCount());
+        UUID id=incident(orgA,"Historical large record");
+        jdbc.update("UPDATE incidents SET description=? WHERE id=?",description,id);
+        mvc.perform(patch(item(orgA,id)).with(human("alice")).contentType("application/json")
+                .content("{\"version\":0,\"description\":\""+description+"\"}"))
+                .andExpect(status().isBadRequest());
+        assertThrows(jakarta.validation.ConstraintViolationException.class,()->service.createIncident(token("alice"),orgA,
+                new CreateIncidentRequest("Large",description)));
+        assertThrows(jakarta.validation.ConstraintViolationException.class,()->service.updateIncident(token("alice"),orgA,id,
+                new UpdateIncidentRequest(null,description,null,0L)));
+        assertEquals(description,service.getIncident(token("alice"),orgA,id).description());
+        assertEquals(0L,service.updateIncident(token("alice"),orgA,id,new UpdateIncidentRequest(null,null,null,0L)).version());
+    }
+
+    @Test
     void shouldCreateAndRetrieveIncident() throws Exception {
         mvc.perform(post(collection(orgA)).with(human("alice")).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Database failure\",\"description\":\"Connections are exhausted\"}"))

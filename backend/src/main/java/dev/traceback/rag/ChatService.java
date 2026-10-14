@@ -75,7 +75,12 @@ public class ChatService {
                 var evidence=new RagContext.Evidence(ref.reference(),source.get(),ref.cited());dependencies.add(evidence);
                 if(ref.cited())citations.add(citation(evidence));
             }
-            if(!valid) {status="REDACTED";content="This answer is unavailable because its source evidence is no longer current or accessible.";citations.clear();dependencies.clear();}
+            if(valid && status.equals("ANSWERED")) {
+                var declared=new HashSet<String>();for(var citation:citations)declared.add(citation.reference());
+                try {valid=CitationPolicy.inline(content,declared).equals(declared);}
+                catch(ChatFailure ex) {valid=false;}
+            }
+            if(!valid) {status="REDACTED";content="This answer is unavailable because its evidence or citation format is no longer current or valid.";citations.clear();dependencies.clear();}
         }
         if(message.role().equals("ASSISTANT") && Set.of("GENERATING","FAILED").contains(status)) content=null;
         citations.sort(Comparator.comparingInt(c->Integer.parseInt(c.reference().substring(1))));
@@ -144,6 +149,7 @@ public class ChatService {
             for(var e:prepared.evidence())evidence.add(new RagContext.Evidence(e.reference(),e.source(),answer.references().contains(e.reference())));
             int n=1;for(var e:inherited.values())if(evidence.stream().noneMatch(v->v.source().key().equals(e.source().key())))evidence.add(new RagContext.Evidence("H"+(n++),e.source(),false));
             var metadata=new LinkedHashMap<String,Object>();metadata.put("protocol","rag-json-v2");metadata.put("provider","OLLAMA_LOCAL");metadata.put("model",settings.model());metadata.put("digest",settings.digest());
+            metadata.put("citationPolicy","commonmark-sources-v1");
             metadata.put("batchSize",settings.batchSize());metadata.put("threads",settings.threads());metadata.put("temperature",settings.temperature());metadata.put("contextTokens",settings.contextTokens());metadata.put("outputTokens",settings.outputTokens());metadata.put("timeoutSeconds",settings.timeoutSeconds());
             metadata.put("retrievalMode",retrieved.effectiveMode().name());metadata.put("retrievalDegradation",retrieved.degradationCode());metadata.put("retrievalLimit",settings.retrievalChunks());metadata.put("minSemanticSimilarity",minSimilarity);
             metadata.put("contextBytes",prepared.bytes());metadata.put("evidenceCount",prepared.evidence().size());metadata.put("historyMessages",prepared.history().size());metadata.put("modelCalled",generated!=null);

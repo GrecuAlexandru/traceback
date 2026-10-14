@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
 
 @Component
 public class RagContext {
@@ -64,13 +63,6 @@ public class RagContext {
         var s=e.source();var value=new LinkedHashMap<String,Object>();value.put("reference",e.reference());value.put("title",s.title());
         value.put("section",s.section());value.put("pageStart",s.pageStart());value.put("pageEnd",s.pageEnd());value.put("passage",s.excerpt());return value;
     }
-    // Reserve S+number for backend citations, while preserving [Service], [SRE],
-    // Markdown links and engineering array/index notation such as values[0].
-    private static final Pattern REFERENCE=Pattern.compile("\\[([Ss]\\s*[0-9][^\\]\\r\\n]*)\\]");
-    private static final Pattern UNSUPPORTED_REFERENCE=Pattern.compile(
-        "(?i)\\[(?:source|citation|cite)\\s*[:#]([^\\]\\r\\n]*)\\]"
-        + "|[\\uE200-\\uE2FF]|【[^】]*(?:†|turn[0-9]|source|cite)[^】]*】"
-        + "|\\[[Ss]\\s*[0-9][^\\]\\r\\n]*(?=\\r|\\n|$)");
     public Answer validate(String output,List<Evidence> evidence) {
         try {
             if(output==null || bytes(output)>8000)throw ChatFailure.provider("MALFORMED_OUTPUT");
@@ -85,15 +77,17 @@ public class RagContext {
                 if(!ref.isString() || !allowed.contains(ref.asString()))throw ChatFailure.provider("INVALID_CITATION");
                 refs.add(ref.asString());
             }
-            if(UNSUPPORTED_REFERENCE.matcher(answer).find())throw ChatFailure.provider("INVALID_CITATION");
-            var inline=new HashSet<String>();var matcher=REFERENCE.matcher(answer);
-            while(matcher.find()) {String ref=matcher.group(1);if(!ref.matches("S[1-9][0-9]{0,2}") || !allowed.contains(ref)
-                    || (matcher.end()<answer.length() && (answer.charAt(matcher.end())=='(' || answer.charAt(matcher.end())=='[')))throw ChatFailure.provider("INVALID_CITATION");refs.add(ref);inline.add(ref);}
+            var inline=CitationPolicy.inline(answer,allowed);
+            // Inline-only selection remains supported. An explicit structured selection
+            // must include every prose reference; a contradictory declaration is rejected.
+            if(!refs.isEmpty() && !refs.containsAll(inline))throw ChatFailure.provider("INVALID_CITATION");
+            refs.addAll(inline);
             if(status.equals("INSUFFICIENT_EVIDENCE") && refs.isEmpty())return new Answer(status,ABSTENTION,Set.of());
             if(!status.equals("ANSWERED"))throw ChatFailure.provider("MALFORMED_OUTPUT");
             if(refs.isEmpty())throw ChatFailure.provider("MISSING_CITATION");
             // The model explicitly declared these sources. Render validated references absent from prose.
-            for(String ref:refs)if(!inline.contains(ref))answer+=" ["+ref+"]";
+            var missing=new LinkedHashSet<>(refs);missing.removeAll(inline);
+            answer=CitationPolicy.append(answer,missing);
             if(bytes(answer)>6000)throw ChatFailure.provider("MALFORMED_OUTPUT");
             return new Answer(status,answer,Collections.unmodifiableSet(refs));
         } catch(ChatFailure ex) {throw ex;}

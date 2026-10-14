@@ -278,7 +278,7 @@ if __name__ == "__main__":
     parser.add_argument("--skip-wrong-audience", action="store_true")
     args = parser.parse_args()
     try:
-        run(args.api_base, wrong_audience=not args.skip_wrong_audience)
+        run(args.api_base, wrong_audience=not args.skip_wrong_audience)  # gitleaks:allow -- boolean CLI expression, no credential
     except SafeError as error:
         print("Smoke test stopped:", error, flush=True)
         raise SystemExit(1) from None

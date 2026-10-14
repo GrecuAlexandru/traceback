@@ -13,6 +13,7 @@ public record UpdateIncidentRequest (
     String title,
 
     @Pattern(regexp = "(?s).*\\S.*", message = "Description must not be blank")
+    @Size(max = 20000)
     String description,
 
     IncidentStatus status,

@@ -133,6 +133,18 @@ class McpIntegrationTest {
                     "traceback_list_incidents",Map.<String,Object>of("organizationId",org.toString(),"page",0,"size",20),
                     "traceback_get_incident",incidentArgs(org,incident)).entrySet())
                 assertFalse(client.callTool(new McpSchema.CallToolRequest(entry.getKey(),entry.getValue())).isError());
+            var mcpMs=new ArrayList<Double>();var restMs=new ArrayList<Double>();
+            for(int i=0;i<23;i++) {
+                long start=System.nanoTime();assertFalse(client.callTool(new McpSchema.CallToolRequest("traceback_get_incident",incidentArgs(org,incident))).isError());
+                double mcp=(System.nanoTime()-start)/1e6;
+                start=System.nanoTime();assertEquals(200,http.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:18084/api/v1/organizations/"+org+"/incidents/"+incident))
+                        .header("Authorization","Bearer "+restToken).GET().build(),HttpResponse.BodyHandlers.discarding()).statusCode());
+                if(i>=3) {mcpMs.add(mcp);restMs.add((System.nanoTime()-start)/1e6);}
+            }
+            var output=java.nio.file.Path.of(System.getProperty("traceback.evaluation.output-dir","target/m15"));java.nio.file.Files.createDirectories(output);
+            java.nio.file.Files.writeString(output.resolve("mcp-performance.json"),McpKeycloak.JSON.writerWithDefaultPrettyPrinter().writeValueAsString(Map.of(
+                    "mcpSdkInvocationMs",mcpMs,"restHttpReadMs",restMs,"warmupPerPath",3,"samplesPerPath",20,
+                    "limitations","Sequential loopback official SDK versus REST with the same short incident and real Keycloak JWTs; includes HTTP/auth/service work, not isolated transport CPU."))+"\n");
         }
         for(var count:counts.entrySet())assertEquals(count.getValue(),jdbc.queryForObject("SELECT count(*) FROM "+count.getKey(),Long.class));
     }
@@ -154,6 +166,27 @@ class McpIntegrationTest {
             int status=http.send(req,HttpResponse.BodyHandlers.discarding()).statusCode();
             assertTrue(status==400 || status==401 || status==403 || status==404,"An alias reached MCP with REST-only credentials");
         }
+    }
+    @Test void restBodiesAreBoundedThroughRealSecurityFiltersForKnownAndChunkedLengths() throws Exception {
+        String large="{\"title\":\"Synthetic\",\"description\":\""+"x".repeat(131072)+"\"}";
+        URI endpoint=URI.create("http://127.0.0.1:18084/api/v1/organizations/"+org+"/incidents");
+        for(boolean chunked:List.of(false,true)) {
+            var body=chunked?HttpRequest.BodyPublishers.ofInputStream(()->new java.io.ByteArrayInputStream(large.getBytes(StandardCharsets.UTF_8)))
+                    :HttpRequest.BodyPublishers.ofString(large);
+            var response=http.send(HttpRequest.newBuilder(endpoint).timeout(Duration.ofSeconds(5))
+                    .header("Authorization","Bearer "+restToken).header("Content-Type","application/json")
+                    .POST(body).build(),HttpResponse.BodyHandlers.ofString());
+            assertEquals(413,response.statusCode());assertTrue(response.body().contains("128 KiB"));
+        }
+        assertEquals(401,http.send(HttpRequest.newBuilder(endpoint).header("Content-Type","application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(large)).build(),HttpResponse.BodyHandlers.discarding()).statusCode());
+        for(String alias:List.of("/%61pi/v1/organizations/", "/api/v1/organiz%61tions/")) {
+            int status=http.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:18084"+alias+org+"/incidents"))
+                    .header("Authorization","Bearer "+restToken).header("Content-Type","application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(large)).build(),HttpResponse.BodyHandlers.discarding()).statusCode();
+            assertTrue(status==413 || status==400,"Encoded alias must not bypass request-body allocation guard");
+        }
+        assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM incidents WHERE organization_id=?",Integer.class,org));
     }
     @Test void realProtectedResourceDiscoveryMatchesKeycloakAndRejectsInvalidResourceIndicator()throws Exception {
         var metadata=http.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:18084/.well-known/oauth-protected-resource/mcp")).GET().build(),HttpResponse.BodyHandlers.ofString());

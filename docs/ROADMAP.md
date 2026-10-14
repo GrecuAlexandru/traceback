@@ -1,6 +1,6 @@
 # Traceback — Development Roadmap
 
-**Last source review:** Local `codex/m13-rag-chat`, 2026-10-14; M9A–M13 approved for local development by the M14 request; M14 verified locally (221 tests); review pending.
+**Last source review:** Local `codex/m15-security-evaluation`, 2026-10-14; M9A–M14 approved for local development by the M15 request. M15 implemented locally; review pending. See its verification report for exact evidence.
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
@@ -109,7 +109,7 @@ claim. CPU turns take roughly 52–97 seconds; a 60-second bound was insufficien
 1.5B/OOM/timeout observations are retained. Final regression evidence is recorded in M13;
 the M14 request approves M13 locally. Historical evaluation evidence remains unchanged.
 
-## M14 — Secure read-only MCP — IMPLEMENTED LOCALLY; REVIEW PENDING
+## M14 — Secure read-only MCP — APPROVED for local development
 
 **Deliver:** Disabled-by-default stateless Streamable HTTP `/mcp` with six explicit read-only
 organization, incident, document, search and exact-source tools. Reuse existing services and
@@ -129,13 +129,22 @@ independent REST behavior. The requested M13 marker correction preserves normal 
 2026-07-28, automatic client registration and browser Inspector CORS are not claimed. See
 [M14_SECURE_MCP.md](M14_SECURE_MCP.md) for exact final commands/results, schemas, client setup,
 security review and remaining limits; [ADR-0009](DECISIONS/0009-stateless-read-only-mcp.md)
-records transport/OAuth decisions. Stop for M14 review; do not start M15.
+records transport/OAuth decisions. The M15 request approves M14 locally; its historical
+evaluation and implementation report remain unchanged.
 
-## M15 — AI safety and quality evaluation — PLANNED
+## M15 — Security hardening, AI evaluation and operational readiness — IMPLEMENTED LOCALLY; REVIEW PENDING
 
-**Deliver:** Prompt-injection fixtures, tenant-leak tests, retrieval comparison (keyword/vector/hybrid), citation audits, abstention checks, and latency/cost benchmarks.
+**Delivered:** Markdown-aware citation validation and historical-read protection, strict REST
+expiry and bounded input, targeted dependency patches, source/tenant/auth/commit-recovery
+regressions, 39-document/78-query retrieval evaluation, 24 deterministic RAG cases, 12
+adversarial cases, bounded live Qwen evaluation, dense publication/corpus/MCP benchmarks,
+readiness/metrics/troubleshooting and pinned CI quality/security gates. No migration or
+production exposure. M12/M13 historical results are preserved.
 
-**Acceptance:** Reproducible report with actual measured outcomes and documented limitations; no invented quality numbers.
+**Evidence:** [M15_SECURITY_AND_EVALUATION.md](M15_SECURITY_AND_EVALUATION.md) records exact
+commands, actual results, pre/post dependency scans, risk register and production gaps.
+Local implementation is ready for user review; this is not production security certification.
+Stop after M15. M16 remains planned and requires separate approval.
 
 ## M16 — Minimal React frontend — PLANNED
 

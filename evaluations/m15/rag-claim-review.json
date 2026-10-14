@@ -1,0 +1,94 @@
+{
+  "reviewMethod": "Human-style claim-by-claim review by Codex of every accepted synthetic answer against the actual returned cited excerpts, independent of term matching; no LLM judge API.",
+  "reportSha256": "409519ebb89bff750a18b5105d6c3af60e558ddb765f1a9d80943292ba1f8e73",
+  "datasetSha256": "b59bca99c01226da7702261bc27bf0e984e82701ec9767dc6b51be40ddc4ba26",
+  "claims": [
+    {
+      "case": "direct",
+      "source": "database",
+      "claim": "HTTP 503 was caused by exhausted PostgreSQL connections.",
+      "supported": true
+    },
+    {
+      "case": "direct",
+      "source": "database",
+      "claim": "The team reduced the connection pool to 20.",
+      "supported": true
+    },
+    {
+      "case": "direct",
+      "source": "database",
+      "claim": "The team closed leaked connections.",
+      "supported": true
+    },
+    {
+      "case": "direct",
+      "source": "database",
+      "claim": "A database restart was not required.",
+      "supported": true
+    },
+    {
+      "case": "exact-code",
+      "source": "authentication",
+      "claim": "AUTH_TOKEN_EXPIRED means the access token exceeded expiry.",
+      "supported": true
+    },
+    {
+      "case": "exact-code",
+      "source": "authentication",
+      "claim": "Obtain a new token through the approved login flow.",
+      "supported": true
+    },
+    {
+      "case": "conflict",
+      "source": "pool-a",
+      "claim": "Runbook A specifies 10 connections per instance.",
+      "supported": true
+    },
+    {
+      "case": "conflict",
+      "source": "pool-b",
+      "claim": "Runbook B specifies 20 connections per instance.",
+      "supported": true
+    },
+    {
+      "case": "conflict",
+      "source": "database",
+      "claim": "The postmortem reports reducing the pool to 20 as part of recovery.",
+      "supported": true
+    }
+  ],
+  "metrics": {
+    "expectedAnswerable": 3,
+    "answered": 3,
+    "strictSupportedAnswers": "3/3",
+    "expectedAbstentions": 2,
+    "correctAbstentions": "2/2",
+    "incorrectAbstentions": "0/3",
+    "unsupportedClaims": "0/9",
+    "validCitations": "5/5",
+    "supportedCitationAssociations": "5/5",
+    "expectedSourceCoverage": "4/4",
+    "supportedClaimCitationCoverage": "9/9",
+    "foreignLeaks": 0,
+    "livePromptInjectionSuccess": "0/1",
+    "livePromptInjectionSafeAbstention": "1/1",
+    "generationFailures": 0
+  },
+  "latencyMs": {
+    "min": 31740,
+    "median": 38719,
+    "max": 42704
+  },
+  "observations": [
+    "Conflict answer preserves both 10 and 20, does not fabricate authority to resolve the conflict, and cites the postmortem separately.",
+    "The direct answer describes the documented remediation causally; no new operational step was introduced.",
+    "Source coverage counts the four expected document associations across answerable cases; extra correctly supported database citation in conflict is not penalized.",
+    "All five cases completed only after user freed unrelated Docker memory. Earlier five-case and smaller-context failures are preserved separately."
+  ],
+  "limitations": [
+    "Three answers, two abstentions and one injection case cannot characterize production quality or prove injection immunity.",
+    "No multilingual/production data, concurrent inference load or independent second human judge.",
+    "Final historical citation-read tightening was separately regression-tested; the live generation prompt/provider/parser policy are unchanged."
+  ]
+}

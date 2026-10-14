@@ -6,6 +6,9 @@ spring:
     url: jdbc:postgresql://localhost:5433/traceback
     username: ${DB_USER:traceback}
     password: ${DB_PASSWORD:traceback_dev}
+    hikari:
+      connection-timeout: 3000
+      validation-timeout: 1000
 
   jpa:
     hibernate:
@@ -117,6 +120,9 @@ management:
       show-details: never
       probes:
         enabled: true
+      group:
+        readiness:
+          include: readinessState,db
   health:
     diskspace:
       enabled: false

@@ -1,0 +1,1010 @@
+{
+  "version": 1,
+  "unit": "document (deduplicate chunks before scoring)",
+  "labelPolicy": "3 directly answers; 2 relevant to deliberately ambiguous symptom; archived sources relevant only to historical questions",
+  "documents": [
+    {
+      "key": "pool-current",
+      "title": "PostgreSQL connection exhaustion — current",
+      "text": "# PostgreSQL connection exhaustion\n\nCheckout HTTP 503 came from leaked JDBC connections. HikariPool-1 - Connection is not available, request timed out after 30000ms. pg_stat_activity showed idle in transaction. Close connections with try-with-resources, cancel abandoned transactions, then set the pool maximum to 20. Restarting PostgreSQL is not the first action.",
+      "topic": "pool",
+      "variant": "current"
+    },
+    {
+      "key": "pool-similar",
+      "title": "PostgreSQL connection exhaustion — similar",
+      "text": "# PostgreSQL connection exhaustion\n\nCheckout HTTP 503 also occurred during a database lock convoy. The pool had free connections; pg_locks showed a schema migration holding AccessExclusiveLock. Stop the blocking migration after approval. Increasing maximumPoolSize cannot fix a lock convoy.",
+      "topic": "pool",
+      "variant": "similar"
+    },
+    {
+      "key": "pool-archived",
+      "title": "PostgreSQL connection exhaustion — archived",
+      "text": "# PostgreSQL connection exhaustion\n\nArchived 2022 database recovery: pool maximum 80 and service restart were used on a smaller single-instance system. This procedure is obsolete after the JDBC leak fix. Do not apply its pool setting to current checkout.",
+      "topic": "pool",
+      "variant": "archived"
+    },
+    {
+      "key": "auth-current",
+      "title": "Authentication and authorization failures — current",
+      "text": "# Authentication and authorization failures\n\nAUTH_TOKEN_EXPIRED is HTTP 401: renew the access token using the approved login flow. Validate signature, issuer and traceback-api audience. An MCP-only resource token cannot authenticate REST. Never log bearer tokens while diagnosing a failed login.",
+      "topic": "auth",
+      "variant": "current"
+    },
+    {
+      "key": "auth-similar",
+      "title": "Authentication and authorization failures — similar",
+      "text": "# Authentication and authorization failures\n\nORG_MEMBERSHIP_REMOVED is HTTP 403 despite a valid unexpired token. Read current persisted memberships; token roles and email are not organization authority. Restore membership only through an administrator's approved workflow. Token refresh does not recreate membership.",
+      "topic": "auth",
+      "variant": "similar"
+    },
+    {
+      "key": "auth-archived",
+      "title": "Authentication and authorization failures — archived",
+      "text": "# Authentication and authorization failures\n\nArchived gateway v1 reported all authorization failures as HTTP 500. It accepted audience legacy-api. Current resource servers require traceback-api and distinguish 401 authentication from 403 membership. This gateway guide is retained solely for historical incident analysis.",
+      "topic": "auth",
+      "variant": "archived"
+    },
+    {
+      "key": "edge-current",
+      "title": "HTTP 500 502 and 503 at the gateway — current",
+      "text": "# HTTP 500 502 and 503 at the gateway\n\nPayments gateway HTTP 502 with upstream prematurely closed connection was caused by backend pod termination. Compare upstream reset counters and pod termination timestamps. Drain traffic before shutdown and set terminationGracePeriodSeconds to 45. This is different from an application HTTP 500.",
+      "topic": "edge",
+      "variant": "current"
+    },
+    {
+      "key": "edge-similar",
+      "title": "HTTP 500 502 and 503 at the gateway — similar",
+      "text": "# HTTP 500 502 and 503 at the gateway\n\nPayments HTTP 500 stack trace: java.lang.NullPointerException at InvoiceMapper.map(InvoiceMapper.java:87). No upstream reset occurred. Roll back invoice mapper release r42. HTTP 503 with Retry-After instead means deliberate admission rejection; retries must be bounded.",
+      "topic": "edge",
+      "variant": "similar"
+    },
+    {
+      "key": "edge-archived",
+      "title": "HTTP 500 502 and 503 at the gateway — archived",
+      "text": "# HTTP 500 502 and 503 at the gateway\n\nArchived edge proxy config treated every 502 as DNS failure and advised flushing DNS immediately. The old proxy emitted no upstream reset metric. Current runbooks require distinguishing backend termination, mapper exceptions and admission 503 before changing network settings.",
+      "topic": "edge",
+      "variant": "archived"
+    },
+    {
+      "key": "deployment-current",
+      "title": "Kubernetes deployment failures — current",
+      "text": "# Kubernetes deployment failures\n\nDeployment checkout-v3 stalled with ProgressDeadlineExceeded. A readiness path changed from /ready to /health/ready while the probe still used the old path. Verify endpoints and rollout status, patch the probe, and resume only when ready replicas stabilize. Do not disable readiness checks.",
+      "topic": "deployment",
+      "variant": "current"
+    },
+    {
+      "key": "deployment-similar",
+      "title": "Kubernetes deployment failures — similar",
+      "text": "# Kubernetes deployment failures\n\nThe same checkout deployment stalled with ImagePullBackOff because registry credentials expired. Pod events showed failed to authorize pulling image. Renew the imagePullSecret through the approved secret workflow, then retry rollout. Changing readiness paths does not fix image pulls.",
+      "topic": "deployment",
+      "variant": "similar"
+    },
+    {
+      "key": "deployment-archived",
+      "title": "Kubernetes deployment failures — archived",
+      "text": "# Kubernetes deployment failures\n\nArchived Kubernetes rollout guide used maxUnavailable=100% and disabled readiness during deployment. It predates zero-downtime checkout. Keep it for historical context; current rollout uses maxUnavailable=0 and tested readiness probes.",
+      "topic": "deployment",
+      "variant": "archived"
+    },
+    {
+      "key": "memory-current",
+      "title": "JVM memory growth — current",
+      "text": "# JVM memory growth\n\njava.lang.OutOfMemoryError: Java heap space in report generation followed an unbounded tenantReportCache. Retained byte arrays dominated the heap histogram. Bound cache entries by weight, close report streams and compare retained heap after garbage collection. Capture only synthetic or sanitized heap evidence.",
+      "topic": "memory",
+      "variant": "current"
+    },
+    {
+      "key": "memory-similar",
+      "title": "JVM memory growth — similar",
+      "text": "# JVM memory growth\n\nA report worker was OOMKilled with stable Java heap. Native direct buffers grew while Netty pooled allocations remained unreleased. Track process RSS versus heap and release ByteBuf ownership exactly once. Increasing Java Xmx may worsen this container native-memory incident.",
+      "topic": "memory",
+      "variant": "similar"
+    },
+    {
+      "key": "memory-archived",
+      "title": "JVM memory growth — archived",
+      "text": "# JVM memory growth\n\nArchived report memory guide set -Xmx equal to the container memory limit. It omitted native buffers and JVM overhead. The setting is obsolete; historical heap charts alone cannot diagnose RSS-driven OOMKilled events.",
+      "topic": "memory",
+      "variant": "archived"
+    },
+    {
+      "key": "rollback-current",
+      "title": "Safe rollback procedures — current",
+      "text": "# Safe rollback procedures\n\nRelease ledger-r18 rollback order: 1. Pause new writes. 2. Verify schema compatibility with ledger-r17. 3. Switch traffic to r17. 4. Resume writes after smoke checks. The additive nullable column is backward compatible. Preserve source rows and audit records.",
+      "topic": "rollback",
+      "variant": "current"
+    },
+    {
+      "key": "rollback-similar",
+      "title": "Safe rollback procedures — similar",
+      "text": "# Safe rollback procedures\n\nLedger-r19 introduced a destructive currency type migration. Application rollback alone is unsafe because r17 cannot read the new representation. Stop writes and escalate to the database recovery owner; use the reviewed forward repair. Do not run an automatic down migration.",
+      "topic": "rollback",
+      "variant": "similar"
+    },
+    {
+      "key": "rollback-archived",
+      "title": "Safe rollback procedures — archived",
+      "text": "# Safe rollback procedures\n\nArchived ledger emergency guide restored last night's database snapshot on every failed deploy. This loses later writes and is superseded. It is relevant only to analysis of the 2021 rollback incident, not current recovery instructions.",
+      "topic": "rollback",
+      "variant": "archived"
+    },
+    {
+      "key": "network-current",
+      "title": "Network timeout diagnosis — current",
+      "text": "# Network timeout diagnosis\n\nPartner API requests failed with java.net.SocketTimeoutException: Read timed out after 2000ms. TCP connect completed quickly, but the peer stalled response bodies. Set a bounded read deadline and retry only idempotent requests with jitter. Trace connect and first-byte durations separately.",
+      "topic": "network",
+      "variant": "current"
+    },
+    {
+      "key": "network-similar",
+      "title": "Network timeout diagnosis — similar",
+      "text": "# Network timeout diagnosis\n\nPartner integration failed with java.net.UnknownHostException: partner.internal. Resolver NXDOMAIN preceded any TCP connection. Inspect service discovery and DNS records; changing the response read timeout cannot fix name resolution. Avoid retry storms during DNS recovery.",
+      "topic": "network",
+      "variant": "similar"
+    },
+    {
+      "key": "network-archived",
+      "title": "Network timeout diagnosis — archived",
+      "text": "# Network timeout diagnosis\n\nArchived partner client disabled all connect and read timeouts to tolerate slow responses. Calls then occupied the whole connection pool. The guide is obsolete; current clients have separate finite connect and read deadlines.",
+      "topic": "network",
+      "variant": "archived"
+    },
+    {
+      "key": "jobs-current",
+      "title": "Distributed job leases — current",
+      "text": "# Distributed job leases\n\nExport job JOB_LEASE_LOST occurs after worker restart and replacement claim. Persist a unique lease token, renew before expiry, and compare that token during finalization. A stale worker may finish computation but cannot commit results. Redelivery is expected; result publication must be idempotent.",
+      "topic": "jobs",
+      "variant": "current"
+    },
+    {
+      "key": "jobs-similar",
+      "title": "Distributed job leases — similar",
+      "text": "# Distributed job leases\n\nExport jobs remained PENDING because the outbox dispatcher crashed after database commit but before queue send. Reconcile undelivered outbox rows and resume bounded dispatch. There was no worker lease to renew yet; changing worker timeouts cannot publish missing messages.",
+      "topic": "jobs",
+      "variant": "similar"
+    },
+    {
+      "key": "jobs-archived",
+      "title": "Distributed job leases — archived",
+      "text": "# Distributed job leases\n\nArchived export worker used a process-local boolean as its only lock. Multiple hosts executed duplicate side effects after restart. It predates durable token fencing and must not be reused for current distributed jobs.",
+      "topic": "jobs",
+      "variant": "archived"
+    },
+    {
+      "key": "cache-current",
+      "title": "Cache invalidation and permissions — current",
+      "text": "# Cache invalidation and permissions\n\nProfile reads showed old display names after a database update because profile_cache:v2 invalidation was omitted. Publish invalidation after successful commit and bound entry lifetime. Use the organization in every cache key. This data cache must never become authorization authority.",
+      "topic": "cache",
+      "variant": "current"
+    },
+    {
+      "key": "cache-similar",
+      "title": "Cache invalidation and permissions — similar",
+      "text": "# Cache invalidation and permissions\n\nA permissions prototype cached organization membership in a process-local map and served stale authorization after revocation. Remove that authorization cache and query current membership. A profile display-cache TTL change cannot enforce immediate membership removal.",
+      "topic": "cache",
+      "variant": "similar"
+    },
+    {
+      "key": "cache-archived",
+      "title": "Cache invalidation and permissions — archived",
+      "text": "# Cache invalidation and permissions\n\nArchived profile guide flushed the entire shared cache on each update and keyed entries only by numeric user ID. It predates tenant keys. Retain for incident reconstruction; current cache keys include organization identity.",
+      "topic": "cache",
+      "variant": "archived"
+    },
+    {
+      "key": "ratelimit-current",
+      "title": "API rate limiting — current",
+      "text": "# API rate limiting\n\nPublic API returns HTTP 429 RATE_BUDGET_EXHAUSTED with Retry-After. Partition budgets by authorized organization and client identity, cap map growth, and apply jittered bounded retries. A caller must not select another tenant's bucket through a request field.",
+      "topic": "ratelimit",
+      "variant": "current"
+    },
+    {
+      "key": "ratelimit-similar",
+      "title": "API rate limiting — similar",
+      "text": "# API rate limiting\n\nThe same client saw HTTP 503 GENERATION_CAPACITY when all local inference slots were busy. This is concurrent admission, not a one-minute rate budget. Do not spawn unbounded retry threads; wait for occupied calls to finish before retrying with the same operation key.",
+      "topic": "ratelimit",
+      "variant": "similar"
+    },
+    {
+      "key": "ratelimit-archived",
+      "title": "API rate limiting — archived",
+      "text": "# API rate limiting\n\nArchived API limiter kept every anonymous client-supplied key forever and omitted Retry-After. A later bounded fixed-window implementation replaced it. The old process-local limiter never provided a global distributed quota.",
+      "topic": "ratelimit",
+      "variant": "archived"
+    },
+    {
+      "key": "queue-current",
+      "title": "Queue retries and dead letters — current",
+      "text": "# Queue retries and dead letters\n\nIngestion QUEUE_UNAVAILABLE leaves the transactional outbox pending. Dispatch retries with exponential backoff. A send followed by delivery-commit failure can duplicate messages, so consumers compare persisted job identity and complete idempotently. Never delete a committed event to clear backlog.",
+      "topic": "queue",
+      "variant": "current"
+    },
+    {
+      "key": "queue-similar",
+      "title": "Queue retries and dead letters — similar",
+      "text": "# Queue retries and dead letters\n\nPoison ingestion payload INVALID_MESSAGE reached the dead-letter queue after eight receives. Inspect sanitized event identifiers, repair the producer, and redrive only eligible messages. Redriving does not reset a terminal FAILED job; an approved new-generation retry is separate.",
+      "topic": "queue",
+      "variant": "similar"
+    },
+    {
+      "key": "queue-archived",
+      "title": "Queue retries and dead letters — archived",
+      "text": "# Queue retries and dead letters\n\nArchived ingestion retry guide acknowledged every failed message before persisting failure. Lost work followed. Current consumers acknowledge only durable successful or obsolete handling and leave recoverable failures for redelivery.",
+      "topic": "queue",
+      "variant": "archived"
+    },
+    {
+      "key": "observability-current",
+      "title": "Observability and alerting — current",
+      "text": "# Observability and alerting\n\nAlert OUTBOX_AGE_HIGH measures oldest pending publication age, not just event count. Correlate queue reachability, failed publication counters and worker lease age. Labels contain only fixed states/outcomes; never raw organization UUIDs, document text, tokens or user questions.",
+      "topic": "observability",
+      "variant": "current"
+    },
+    {
+      "key": "observability-similar",
+      "title": "Observability and alerting — similar",
+      "text": "# Observability and alerting\n\nAlert API_ERROR_BURN tracks the ratio of HTTP 5xx to total requests over short and long windows. A low-volume endpoint can have high percentage with few requests, so inspect volume and latency together. Health liveness must not include remote inference dependency failure.",
+      "topic": "observability",
+      "variant": "similar"
+    },
+    {
+      "key": "observability-archived",
+      "title": "Observability and alerting — archived",
+      "text": "# Observability and alerting\n\nArchived monitoring guide labeled each timer with raw request URLs and access-token subject. This caused unbounded cardinality and privacy exposure. Current metrics use route templates and fixed outcomes; the old dashboards are obsolete.",
+      "topic": "observability",
+      "variant": "archived"
+    },
+    {
+      "key": "postmortem-current",
+      "title": "Production incident postmortems — current",
+      "text": "# Production incident postmortems\n\nSynthetic incident INC-204: invoice HTTP 503 lasted 17 minutes after a release doubled concurrent database borrowers. No data loss occurred. Mitigation reduced pool demand and rolled back the new fan-out. Follow-up adds load tests and an alert on pending borrowers; owner is the platform team.",
+      "topic": "postmortem",
+      "variant": "current"
+    },
+    {
+      "key": "postmortem-similar",
+      "title": "Production incident postmortems — similar",
+      "text": "# Production incident postmortems\n\nSynthetic incident INC-205: invoice HTTP 503 lasted 11 minutes during a network policy rollout. Database capacity stayed normal; denied egress caused socket connect timeouts. Revert the network policy and test connectivity. Pool expansion was not the corrective action.",
+      "topic": "postmortem",
+      "variant": "similar"
+    },
+    {
+      "key": "postmortem-archived",
+      "title": "Production incident postmortems — archived",
+      "text": "# Production incident postmortems\n\nArchived INC-104 postmortem attributed invoice 503 to database saturation without checking network policy. Its root-cause statement was later withdrawn. Use INC-204 and INC-205 for current differentiated evidence rather than treating the shared symptom as proof.",
+      "topic": "postmortem",
+      "variant": "archived"
+    }
+  ],
+  "queries": [
+    {
+      "key": "pool-exact",
+      "q": "HikariPool-1 Connection is not available",
+      "kind": "exact",
+      "split": "development",
+      "relevance": {
+        "pool-current": 3
+      }
+    },
+    {
+      "key": "pool-paraphrase",
+      "q": "Why do database borrowers wait while transactions sit idle?",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "pool-current": 3
+      }
+    },
+    {
+      "key": "pool-confounder",
+      "q": "Checkout AccessExclusiveLock with free pool connections",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "pool-similar": 3
+      }
+    },
+    {
+      "key": "pool-synthesis",
+      "q": "Distinguish checkout connection leaks from database lock convoys",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "pool-current": 3,
+        "pool-similar": 3
+      }
+    },
+    {
+      "key": "pool-historical",
+      "q": "What pool maximum did the archived 2022 procedure use?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "pool-archived": 3
+      }
+    },
+    {
+      "key": "pool-ambiguous",
+      "q": "checkout HTTP 503 database recovery",
+      "kind": "ambiguous",
+      "split": "development",
+      "relevance": {
+        "pool-current": 2,
+        "pool-similar": 2
+      }
+    },
+    {
+      "key": "auth-exact",
+      "q": "AUTH_TOKEN_EXPIRED",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "auth-current": 3
+      }
+    },
+    {
+      "key": "auth-paraphrase",
+      "q": "A login credential is too old; how can the caller recover?",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "auth-current": 3
+      }
+    },
+    {
+      "key": "auth-confounder",
+      "q": "ORG_MEMBERSHIP_REMOVED valid token",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "auth-similar": 3
+      }
+    },
+    {
+      "key": "auth-synthesis",
+      "q": "Distinguish token expiration from removed organization membership",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "auth-current": 3,
+        "auth-similar": 3
+      }
+    },
+    {
+      "key": "auth-historical",
+      "q": "Which audience did archived gateway v1 accept?",
+      "kind": "historical",
+      "split": "development",
+      "relevance": {
+        "auth-archived": 3
+      }
+    },
+    {
+      "key": "auth-ambiguous",
+      "q": "authorization fails after login",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "auth-current": 2,
+        "auth-similar": 2
+      }
+    },
+    {
+      "key": "edge-exact",
+      "q": "upstream prematurely closed connection",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "edge-current": 3
+      }
+    },
+    {
+      "key": "edge-paraphrase",
+      "q": "The payment proxy loses a response as a backend pod shuts down",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "edge-current": 3
+      }
+    },
+    {
+      "key": "edge-confounder",
+      "q": "InvoiceMapper.map InvoiceMapper.java 87 NullPointerException",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "edge-similar": 3
+      }
+    },
+    {
+      "key": "edge-synthesis",
+      "q": "Compare payment mapper HTTP 500 with termination HTTP 502",
+      "kind": "synthesis",
+      "split": "development",
+      "relevance": {
+        "edge-current": 3,
+        "edge-similar": 3
+      }
+    },
+    {
+      "key": "edge-historical",
+      "q": "What did the archived proxy recommend for every 502?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "edge-archived": 3
+      }
+    },
+    {
+      "key": "edge-ambiguous",
+      "q": "payments gateway server errors",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "edge-current": 2,
+        "edge-similar": 2
+      }
+    },
+    {
+      "key": "deployment-exact",
+      "q": "ProgressDeadlineExceeded readiness",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "deployment-current": 3
+      }
+    },
+    {
+      "key": "deployment-paraphrase",
+      "q": "New replicas run but traffic never reaches the changed health endpoint",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "deployment-current": 3
+      }
+    },
+    {
+      "key": "deployment-confounder",
+      "q": "ImagePullBackOff failed to authorize pulling image",
+      "kind": "confounder",
+      "split": "development",
+      "relevance": {
+        "deployment-similar": 3
+      }
+    },
+    {
+      "key": "deployment-synthesis",
+      "q": "Distinguish a bad deployment probe from expired registry credentials",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "deployment-current": 3,
+        "deployment-similar": 3
+      }
+    },
+    {
+      "key": "deployment-historical",
+      "q": "What maxUnavailable did the archived rollout guide allow?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "deployment-archived": 3
+      }
+    },
+    {
+      "key": "deployment-ambiguous",
+      "q": "checkout Kubernetes rollout stalled",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "deployment-current": 2,
+        "deployment-similar": 2
+      }
+    },
+    {
+      "key": "memory-exact",
+      "q": "tenantReportCache Java heap space",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "memory-current": 3
+      }
+    },
+    {
+      "key": "memory-paraphrase",
+      "q": "Reports retain more cached byte arrays after each collection",
+      "kind": "paraphrase",
+      "split": "development",
+      "relevance": {
+        "memory-current": 3
+      }
+    },
+    {
+      "key": "memory-confounder",
+      "q": "OOMKilled stable heap ByteBuf native buffers",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "memory-similar": 3
+      }
+    },
+    {
+      "key": "memory-synthesis",
+      "q": "Compare report heap retention with native buffer memory growth",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "memory-current": 3,
+        "memory-similar": 3
+      }
+    },
+    {
+      "key": "memory-historical",
+      "q": "How did the archived report guide choose Xmx?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "memory-archived": 3
+      }
+    },
+    {
+      "key": "memory-ambiguous",
+      "q": "report worker memory keeps growing",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "memory-current": 2,
+        "memory-similar": 2
+      }
+    },
+    {
+      "key": "rollback-exact",
+      "q": "ledger-r18 rollback order",
+      "kind": "exact",
+      "split": "development",
+      "relevance": {
+        "rollback-current": 3
+      }
+    },
+    {
+      "key": "rollback-paraphrase",
+      "q": "How can we revert the additive ledger release without losing writes?",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "rollback-current": 3
+      }
+    },
+    {
+      "key": "rollback-confounder",
+      "q": "ledger-r19 destructive currency migration rollback",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "rollback-similar": 3
+      }
+    },
+    {
+      "key": "rollback-synthesis",
+      "q": "Compare backward compatible ledger rollback with destructive schema change",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "rollback-current": 3,
+        "rollback-similar": 3
+      }
+    },
+    {
+      "key": "rollback-historical",
+      "q": "Which restore procedure caused lost writes in the 2021 ledger incident?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "rollback-archived": 3
+      }
+    },
+    {
+      "key": "rollback-ambiguous",
+      "q": "ledger failed deploy rollback safety",
+      "kind": "ambiguous",
+      "split": "development",
+      "relevance": {
+        "rollback-current": 2,
+        "rollback-similar": 2
+      }
+    },
+    {
+      "key": "network-exact",
+      "q": "SocketTimeoutException Read timed out 2000ms",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "network-current": 3
+      }
+    },
+    {
+      "key": "network-paraphrase",
+      "q": "A partner accepts the connection but never finishes its response body",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "network-current": 3
+      }
+    },
+    {
+      "key": "network-confounder",
+      "q": "UnknownHostException partner.internal NXDOMAIN",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "network-similar": 3
+      }
+    },
+    {
+      "key": "network-synthesis",
+      "q": "Distinguish partner read stalls from failed name resolution",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "network-current": 3,
+        "network-similar": 3
+      }
+    },
+    {
+      "key": "network-historical",
+      "q": "Why did the archived partner client occupy its whole pool?",
+      "kind": "historical",
+      "split": "development",
+      "relevance": {
+        "network-archived": 3
+      }
+    },
+    {
+      "key": "network-ambiguous",
+      "q": "partner integration timeout recovery",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "network-current": 2,
+        "network-similar": 2
+      }
+    },
+    {
+      "key": "jobs-exact",
+      "q": "JOB_LEASE_LOST",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "jobs-current": 3
+      }
+    },
+    {
+      "key": "jobs-paraphrase",
+      "q": "An old export worker finishes after another host took ownership",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "jobs-current": 3
+      }
+    },
+    {
+      "key": "jobs-confounder",
+      "q": "Export PENDING outbox dispatcher crash before send",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "jobs-similar": 3
+      }
+    },
+    {
+      "key": "jobs-synthesis",
+      "q": "Compare stale export completion with an unpublished queue event",
+      "kind": "synthesis",
+      "split": "development",
+      "relevance": {
+        "jobs-current": 3,
+        "jobs-similar": 3
+      }
+    },
+    {
+      "key": "jobs-historical",
+      "q": "Why did archived export locking fail across hosts?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "jobs-archived": 3
+      }
+    },
+    {
+      "key": "jobs-ambiguous",
+      "q": "distributed export job stopped progressing",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "jobs-current": 2,
+        "jobs-similar": 2
+      }
+    },
+    {
+      "key": "cache-exact",
+      "q": "profile_cache:v2 invalidation",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "cache-current": 3
+      }
+    },
+    {
+      "key": "cache-paraphrase",
+      "q": "A saved display name remains old on subsequent profile reads",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "cache-current": 3
+      }
+    },
+    {
+      "key": "cache-confounder",
+      "q": "cached membership stale authorization after revocation",
+      "kind": "confounder",
+      "split": "development",
+      "relevance": {
+        "cache-similar": 3
+      }
+    },
+    {
+      "key": "cache-synthesis",
+      "q": "Compare stale profile data with stale permission caching",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "cache-current": 3,
+        "cache-similar": 3
+      }
+    },
+    {
+      "key": "cache-historical",
+      "q": "How were archived profile cache keys scoped?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "cache-archived": 3
+      }
+    },
+    {
+      "key": "cache-ambiguous",
+      "q": "cache invalidation tenant safety",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "cache-current": 2,
+        "cache-similar": 2
+      }
+    },
+    {
+      "key": "ratelimit-exact",
+      "q": "RATE_BUDGET_EXHAUSTED Retry-After",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "ratelimit-current": 3
+      }
+    },
+    {
+      "key": "ratelimit-paraphrase",
+      "q": "How should a client wait when its request allowance is exhausted?",
+      "kind": "paraphrase",
+      "split": "development",
+      "relevance": {
+        "ratelimit-current": 3
+      }
+    },
+    {
+      "key": "ratelimit-confounder",
+      "q": "GENERATION_CAPACITY inference slots busy",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "ratelimit-similar": 3
+      }
+    },
+    {
+      "key": "ratelimit-synthesis",
+      "q": "Compare API rate budget exhaustion with concurrent inference admission",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "ratelimit-current": 3,
+        "ratelimit-similar": 3
+      }
+    },
+    {
+      "key": "ratelimit-historical",
+      "q": "Why did the archived limiter grow without bound?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "ratelimit-archived": 3
+      }
+    },
+    {
+      "key": "ratelimit-ambiguous",
+      "q": "client retry rate limit capacity",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "ratelimit-current": 2,
+        "ratelimit-similar": 2
+      }
+    },
+    {
+      "key": "queue-exact",
+      "q": "QUEUE_UNAVAILABLE transactional outbox",
+      "kind": "exact",
+      "split": "development",
+      "relevance": {
+        "queue-current": 3
+      }
+    },
+    {
+      "key": "queue-paraphrase",
+      "q": "A queue send fails after the document transaction committed",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "queue-current": 3
+      }
+    },
+    {
+      "key": "queue-confounder",
+      "q": "INVALID_MESSAGE dead-letter eight receives",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "queue-similar": 3
+      }
+    },
+    {
+      "key": "queue-synthesis",
+      "q": "Compare retryable queue publication with poison-message redrive",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "queue-current": 3,
+        "queue-similar": 3
+      }
+    },
+    {
+      "key": "queue-historical",
+      "q": "When did the archived ingestion consumer acknowledge failures?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "queue-archived": 3
+      }
+    },
+    {
+      "key": "queue-ambiguous",
+      "q": "ingestion queue retry recovery",
+      "kind": "ambiguous",
+      "split": "development",
+      "relevance": {
+        "queue-current": 2,
+        "queue-similar": 2
+      }
+    },
+    {
+      "key": "observability-exact",
+      "q": "OUTBOX_AGE_HIGH",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "observability-current": 3
+      }
+    },
+    {
+      "key": "observability-paraphrase",
+      "q": "A small number of unpublished events has been waiting for a long time",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "observability-current": 3
+      }
+    },
+    {
+      "key": "observability-confounder",
+      "q": "API_ERROR_BURN low volume HTTP 5xx",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "observability-similar": 3
+      }
+    },
+    {
+      "key": "observability-synthesis",
+      "q": "Compare stalled publication alerting with API error burn",
+      "kind": "synthesis",
+      "split": "evaluation",
+      "relevance": {
+        "observability-current": 3,
+        "observability-similar": 3
+      }
+    },
+    {
+      "key": "observability-historical",
+      "q": "Which labels made archived monitoring unsafe?",
+      "kind": "historical",
+      "split": "development",
+      "relevance": {
+        "observability-archived": 3
+      }
+    },
+    {
+      "key": "observability-ambiguous",
+      "q": "operational alert health latency",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "observability-current": 2,
+        "observability-similar": 2
+      }
+    },
+    {
+      "key": "postmortem-exact",
+      "q": "INC-204 pending borrowers",
+      "kind": "exact",
+      "split": "evaluation",
+      "relevance": {
+        "postmortem-current": 3
+      }
+    },
+    {
+      "key": "postmortem-paraphrase",
+      "q": "Which invoice outage followed an increase in simultaneous database work?",
+      "kind": "paraphrase",
+      "split": "evaluation",
+      "relevance": {
+        "postmortem-current": 3
+      }
+    },
+    {
+      "key": "postmortem-confounder",
+      "q": "INC-205 denied egress network policy",
+      "kind": "confounder",
+      "split": "evaluation",
+      "relevance": {
+        "postmortem-similar": 3
+      }
+    },
+    {
+      "key": "postmortem-synthesis",
+      "q": "Compare invoice 503 database fan-out and network policy incidents",
+      "kind": "synthesis",
+      "split": "development",
+      "relevance": {
+        "postmortem-current": 3,
+        "postmortem-similar": 3
+      }
+    },
+    {
+      "key": "postmortem-historical",
+      "q": "Why was the archived INC-104 root cause withdrawn?",
+      "kind": "historical",
+      "split": "evaluation",
+      "relevance": {
+        "postmortem-archived": 3
+      }
+    },
+    {
+      "key": "postmortem-ambiguous",
+      "q": "invoice HTTP 503 incident root cause",
+      "kind": "ambiguous",
+      "split": "evaluation",
+      "relevance": {
+        "postmortem-current": 2,
+        "postmortem-similar": 2
+      }
+    }
+  ]
+}

@@ -10,6 +10,7 @@ public record CreateIncidentRequest(
     String title,
 
     @NotBlank
+    @Size(max = 20000)
     String description
 
 ) {}

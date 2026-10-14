@@ -73,3 +73,13 @@ malformed/grouped/lowercase/unclosed S-number references and linked citation mar
 preserving normal Markdown links, headings, [SRE]/[Service] and engineering array notation.
 Exact-source SQL and the M13 evaluation dataset/results are unchanged. M14 read-only tools
 are independent of chat generation; no agentic tool loop was added. See [M14](../M14_SECURE_MCP.md).
+
+**M15 implementation note:** CommonMark AST parsing now separates literal code from visible
+prose. Reserved H/DOC/SRC/REF/source/citation dialects, external citation links/definitions
+and malformed S references fail safely; emphasis/inline HTML cannot split a label to bypass
+validation. Structured selections must cover inline references, with safe backend rendering
+of missing declared markers. Current authorization and citation-format consistency are
+rechecked on history/message/citation/replay reads; invalid old answers redact without
+rewriting stored rows. Policy metadata is `commonmark-sources-v1`. Syntactic provenance
+does not establish semantic claim support. Expanded deterministic and bounded live evidence,
+including earlier memory failures, is in [M15](../M15_SECURITY_AND_EVALUATION.md).

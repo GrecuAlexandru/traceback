@@ -55,7 +55,9 @@ public class IndexWorker {
                     vectors.addAll(batch);
                 }
                 if(lost.get())return new IngestionWorker.Handling(false,settings.leaseSeconds());
-                boolean published=jobs.publish(job,chunks,vectors,TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-started));
+                boolean published;
+                try {published=jobs.publish(job,chunks,vectors,TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-started));}
+                catch(RuntimeException ex) {metrics.counter("traceback.indexing.publication.failures").increment();throw ex;}
                 if(published)metrics.counter("traceback.indexing.completed").increment();
                 return new IngestionWorker.Handling(published,published?0:settings.leaseSeconds());
             } catch(ExtractionFailure ex) {

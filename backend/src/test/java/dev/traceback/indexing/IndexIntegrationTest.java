@@ -41,6 +41,7 @@ class IndexIntegrationTest {
     @Autowired DocumentService documents;@Autowired IngestionWorker verification;@Autowired IngestionRepository ingestion;
     @Autowired IndexRepository indexes;@Autowired IndexWorker worker;@Autowired SearchService search;@Autowired SearchRepository retrieval;
     @Autowired StructureChunker chunker;@Autowired IndexSettings settings;@Autowired JdbcTemplate jdbc;@Autowired MockMvc mvc;
+    @Autowired io.micrometer.core.instrument.MeterRegistry metrics;
     UUID org,foreign;
     Jwt token(String user){return Jwt.withTokenValue("synthetic").header("alg","RS256").issuer("https://issuer.example").subject(user).claim("traceback_principal_type","human").build();}
     @BeforeEach void setup(){
@@ -86,6 +87,14 @@ class IndexIntegrationTest {
     }
     @Test void membershipRevokedDuringEmbeddingIsRechecked(){indexed("HTTP 503");when(embeddings.query(anyString())).thenAnswer(c->{jdbc.update("DELETE FROM organization_memberships WHERE user_id=(SELECT id FROM app_users WHERE subject='alice')");return new float[]{1,0,0};});
         assertThrows(dev.traceback.organization.OrganizationPermissionDeniedException.class,()->query("HTTP",SearchService.Mode.hybrid));}
+    @Test void deletionAndSupersessionDuringQueryEmbeddingCannotReturnOldSources() {
+        var deleted=indexed("HTTP 503 source deleted during retrieval");
+        when(embeddings.query(anyString())).thenAnswer(c->{documents.delete(token("alice"),org,deleted.id(),deleted.version());return new float[]{1,0,0};});
+        assertTrue(query("HTTP 503",SearchService.Mode.hybrid).isEmpty());
+        var replaced=indexed("HTTP 503 source superseded during retrieval");
+        when(embeddings.query(anyString())).thenAnswer(c->{documents.revise(token("alice"),org,replaced.id(),replaced.version(),text("New unindexed source"));return new float[]{1,0,0};});
+        assertTrue(query("HTTP 503",SearchService.Mode.semantic).isEmpty());
+    }
     @Test void deletionAndSupersessionImmediatelyHideEveryMode(){
         var doc=indexed("NullPointerException original");documents.delete(token("alice"),org,doc.id(),doc.version());
         for(var mode:SearchService.Mode.values())assertTrue(query("NullPointerException",mode).isEmpty());
@@ -142,6 +151,24 @@ class IndexIntegrationTest {
         try{assertThrows(DataAccessException.class,()->worker.handle(body,null));assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM document_chunks",Integer.class));assertTrue(query("HTTP",SearchService.Mode.keyword).isEmpty());}
         finally{jdbc.execute("DROP TRIGGER m12_reject_head ON document_index_heads");jdbc.execute("DROP FUNCTION m12_reject_head()");}
         jdbc.update("UPDATE index_generations SET lease_until=clock_timestamp()-interval '1 second'");assertTrue(worker.handle(body,null).acknowledge());assertEquals(1,query("HTTP",SearchService.Mode.keyword).size());
+    }
+    @Test void deferredDatabaseCommitFailureRollsBackPublishedHeadAndRecovers() {
+        var doc=upload(org,"alice","HTTP 503 deferred commit failure");String body=prepare(doc);
+        double before=metrics.counter("traceback.indexing.publication.failures").count();
+        jdbc.execute("CREATE FUNCTION m15_fail_commit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic deferred commit failure'; END $$");
+        jdbc.execute("CREATE CONSTRAINT TRIGGER m15_fail_commit AFTER INSERT ON document_index_heads DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION m15_fail_commit()");
+        try {
+            assertThrows(RuntimeException.class,()->worker.handle(body,null));
+            assertEquals(before+1,metrics.counter("traceback.indexing.publication.failures").count());
+            assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM document_chunks",Integer.class));
+            assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM document_index_heads",Integer.class));
+            assertNotEquals("INDEXED",indexes.find(event(doc).indexGeneration(),false).status());
+            assertTrue(query("HTTP",SearchService.Mode.keyword).isEmpty());
+        } finally {
+            jdbc.execute("DROP TRIGGER m15_fail_commit ON document_index_heads");jdbc.execute("DROP FUNCTION m15_fail_commit()");
+        }
+        jdbc.update("UPDATE index_generations SET lease_until=clock_timestamp()-interval '1 second'");
+        assertTrue(worker.handle(body,null).acknowledge());assertEquals(1,query("HTTP",SearchService.Mode.keyword).size());
     }
     @Test void renewalIsTokenFencedAndTotalDeadlineCannotBeExtended(){var doc=upload(org,"alice","HTTP 503");var claimed=indexes.claim(IndexMessage.parse(prepare(doc))).job();
         assertTrue(indexes.heartbeat(claimed));jdbc.update("UPDATE index_generations SET started_at=clock_timestamp()-interval '11 minutes'");assertFalse(indexes.heartbeat(claimed));

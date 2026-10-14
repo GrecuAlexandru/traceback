@@ -15,7 +15,8 @@ public class SecurityConfig {
     @Bean
     @org.springframework.core.annotation.Order(2)
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, @org.springframework.beans.factory.annotation.Value("${traceback.runtime:api}") String runtime) throws Exception {
+            HttpSecurity http, @org.springframework.beans.factory.annotation.Value("${traceback.runtime:api}") String runtime,
+            io.micrometer.core.instrument.MeterRegistry metrics) throws Exception {
         if (runtime.equals("worker")) {
             return http.csrf(AbstractHttpConfigurer::disable).httpBasic(AbstractHttpConfigurer::disable)
                     .formLogin(AbstractHttpConfigurer::disable)
@@ -50,8 +51,16 @@ public class SecurityConfig {
                 )
 
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(Customizer.withDefaults())
+                        oauth2.jwt(Customizer.withDefaults()).authenticationEntryPoint((request,response,error)->{
+                            metrics.counter("traceback.security.denials","boundary","rest","reason","authentication").increment();
+                            new org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint().commence(request,response,error);
+                        })
                 )
+                .exceptionHandling(errors->errors.accessDeniedHandler((request,response,error)->{
+                    metrics.counter("traceback.security.denials","boundary","rest","reason","authorization").increment();
+                    new org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler().handle(request,response,error);
+                }))
+                .addFilterAfter(new ApiBodyLimitFilter(), org.springframework.security.web.access.intercept.AuthorizationFilter.class)
 
                 .build();
     }

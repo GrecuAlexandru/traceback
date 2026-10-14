@@ -1,0 +1,186 @@
+{
+  "evaluatedAtUTC" : "2026-10-14T18:44:45.254686Z",
+  "timings" : {
+    "incidentRead100Rows" : {
+      "p50Ms" : 0.520375,
+      "samples" : [ 0.550584, 0.551584, 0.530666, 0.519, 0.530417, 0.580417, 0.604625, 0.549166, 0.539417, 0.510917, 0.535584, 0.518041, 0.509542, 0.537084, 0.520375, 0.48825, 0.491667, 0.496792, 0.503667, 0.471167 ],
+      "p95Ms" : 0.580417
+    },
+    "incidentList100Rows" : {
+      "p50Ms" : 1.960167,
+      "samples" : [ 2.005959, 2.035917, 1.670875, 2.603084, 2.5565, 1.863541, 1.724417, 3.081084, 1.960167, 1.412584, 4.345041, 1.760834, 1.637875, 2.023459, 1.951083, 3.196458, 2.080125, 2.047917, 1.515084, 1.572417 ],
+      "p95Ms" : 3.196458
+    },
+    "search/50/keyword" : {
+      "p50Ms" : 2.590542,
+      "samples" : [ 2.813875, 2.90875, 2.812084, 2.485834, 2.18275, 2.391667, 2.286667, 2.228042, 2.526959, 2.820958, 2.624375, 2.590542, 2.520708, 2.48175, 2.532, 4.0885, 5.4195, 7.317375, 3.98025, 5.169875 ],
+      "p95Ms" : 5.4195
+    },
+    "search/50/semantic" : {
+      "p50Ms" : 3.033791,
+      "samples" : [ 3.193542, 2.862375, 2.7675, 2.985875, 2.855708, 3.137667, 3.168584, 3.159708, 3.122458, 2.793166, 2.735958, 2.925958, 3.096708, 3.033791, 3.173459, 3.330625, 3.293375, 3.208875, 2.971209, 3.003667 ],
+      "p95Ms" : 3.293375
+    },
+    "search/50/hybrid" : {
+      "p50Ms" : 4.009292,
+      "samples" : [ 3.81525, 3.985792, 4.019916, 4.21875, 3.965875, 4.009292, 3.695625, 4.267167, 4.141333, 4.31125, 3.994875, 4.196042, 3.987167, 4.11575, 3.817625, 3.935583, 3.980583, 4.127, 4.043917, 4.218875 ],
+      "p95Ms" : 4.267167
+    },
+    "search/200/keyword" : {
+      "p50Ms" : 3.399375,
+      "samples" : [ 3.522333, 3.4695, 3.379708, 3.474458, 3.369, 3.4045, 3.4685, 3.323083, 3.46225, 3.324167, 3.373167, 3.450541, 3.356667, 3.423792, 4.049625, 3.602667, 3.392667, 3.399375, 3.355833, 3.371833 ],
+      "p95Ms" : 3.602667
+    },
+    "search/200/semantic" : {
+      "p50Ms" : 6.8615,
+      "samples" : [ 6.631459, 6.398125, 6.915625, 6.7305, 8.63725, 7.050583, 6.827125, 6.912208, 6.688375, 11.554916, 6.8615, 6.77075, 6.828083, 9.173834, 7.1195, 6.612333, 6.617875, 12.046709, 7.519208, 7.096584 ],
+      "p95Ms" : 11.554916
+    },
+    "search/200/hybrid" : {
+      "p50Ms" : 9.572542,
+      "samples" : [ 9.407041, 15.504875, 12.207541, 9.378292, 10.32225, 9.078334, 9.330416, 9.572542, 9.459917, 9.1165, 9.918125, 14.515333, 11.224792, 10.837708, 11.3445, 13.476208, 10.351, 9.34075, 9.312125, 9.36425 ],
+      "p95Ms" : 14.515333
+    },
+    "search/500/keyword" : {
+      "p50Ms" : 6.7045,
+      "samples" : [ 6.61375, 6.565334, 6.709791, 8.0265, 6.985292, 6.843375, 6.7045, 6.851208, 6.76875, 6.549458, 6.68975, 6.641292, 6.921792, 7.0175, 7.003083, 7.083375, 6.684042, 6.573875, 6.478791, 6.384334 ],
+      "p95Ms" : 7.083375
+    },
+    "search/500/semantic" : {
+      "p50Ms" : 13.561583,
+      "samples" : [ 13.404167, 15.1285, 13.595042, 13.356792, 13.280334, 13.019667, 13.245125, 13.2535, 13.561583, 13.573708, 13.113208, 19.796083, 13.740584, 20.786459, 13.718916, 18.830375, 13.384, 14.259667, 13.618458, 13.476875 ],
+      "p95Ms" : 19.796083
+    },
+    "search/500/hybrid" : {
+      "p50Ms" : 19.718375,
+      "samples" : [ 19.82825, 26.434875, 20.689875, 19.699625, 19.11725, 19.201167, 26.009209, 26.929416, 22.095875, 18.983708, 19.939084, 19.306042, 18.908875, 21.594083, 18.90225, 18.948834, 19.718375, 19.892625, 22.196959, 19.592375 ],
+      "p95Ms" : 26.434875
+    },
+    "documentMetadataList500Rows" : {
+      "p50Ms" : 3.492458,
+      "samples" : [ 4.361667, 4.236, 3.934875, 4.223, 3.817916, 4.118292, 3.751333, 3.741292, 3.492458, 3.195708, 3.1515, 3.2215, 3.282875, 3.132041, 3.153542, 4.543958, 3.589292, 3.276791, 3.141375, 3.204958 ],
+      "p95Ms" : 4.361667
+    },
+    "documentDownload" : {
+      "p50Ms" : 0.733042,
+      "samples" : [ 0.709417, 0.689958, 0.713167, 0.761, 0.723417, 0.894375, 0.74725, 0.733042, 0.727, 0.739959, 0.7045, 0.695333, 0.674625, 0.821333, 0.771542, 0.6955, 0.7545, 1.468208, 1.003208, 0.771042 ],
+      "p95Ms" : 1.003208
+    },
+    "conversationCreate" : {
+      "p50Ms" : 0.498542,
+      "samples" : [ 0.733708, 0.706875, 0.614375, 0.617083, 0.602625, 0.598792, 0.612208, 0.488917, 0.488375, 0.768708, 0.906333, 0.563542, 0.476417, 0.498542, 0.474291, 0.48975, 0.4545, 0.466791, 0.466334, 0.471875 ],
+      "p95Ms" : 0.768708
+    },
+    "ragEndToEndScriptedProvider" : {
+      "p50Ms" : 31.552666,
+      "samples" : [ 34.033041, 31.319042, 31.999417, 31.582708, 32.21725, 33.099666, 34.50175, 32.686292, 31.343083, 31.552666, 33.285291, 31.1775, 30.701125, 30.988, 31.372875, 32.702458, 30.847625, 30.181042, 30.701208, 31.604 ],
+      "p95Ms" : 34.033041
+    }
+  },
+  "pipelineThroughput" : [ {
+    "corpusDocuments" : 50,
+    "seconds" : 1.109094917,
+    "documentsPerSecond" : 45.08180430151588,
+    "addedDocuments" : 50
+  }, {
+    "corpusDocuments" : 200,
+    "seconds" : 3.250970917,
+    "documentsPerSecond" : 46.14006210133069,
+    "addedDocuments" : 150
+  }, {
+    "corpusDocuments" : 500,
+    "seconds" : 6.935429834,
+    "documentsPerSecond" : 43.25615097845715,
+    "addedDocuments" : 300
+  } ],
+  "publication" : [ {
+    "trial" : 0,
+    "chunks" : 64,
+    "dimensions" : 768,
+    "publicationMs" : 36.297042
+  }, {
+    "trial" : 1,
+    "chunks" : 64,
+    "dimensions" : 768,
+    "publicationMs" : 27.761458
+  }, {
+    "trial" : 2,
+    "chunks" : 64,
+    "dimensions" : 768,
+    "publicationMs" : 27.354292
+  }, {
+    "trial" : 3,
+    "chunks" : 64,
+    "dimensions" : 768,
+    "publicationMs" : 30.958708
+  }, {
+    "trial" : 4,
+    "chunks" : 64,
+    "dimensions" : 768,
+    "publicationMs" : 35.269208
+  }, {
+    "trial" : 0,
+    "chunks" : 256,
+    "dimensions" : 768,
+    "publicationMs" : 114.714334
+  }, {
+    "trial" : 1,
+    "chunks" : 256,
+    "dimensions" : 768,
+    "publicationMs" : 105.968583
+  }, {
+    "trial" : 2,
+    "chunks" : 256,
+    "dimensions" : 768,
+    "publicationMs" : 102.890792
+  }, {
+    "trial" : 3,
+    "chunks" : 256,
+    "dimensions" : 768,
+    "publicationMs" : 105.725167
+  }, {
+    "trial" : 4,
+    "chunks" : 256,
+    "dimensions" : 768,
+    "publicationMs" : 106.024209
+  }, {
+    "trial" : 0,
+    "chunks" : 512,
+    "dimensions" : 768,
+    "publicationMs" : 225.342208
+  }, {
+    "trial" : 1,
+    "chunks" : 512,
+    "dimensions" : 768,
+    "publicationMs" : 218.371708
+  }, {
+    "trial" : 2,
+    "chunks" : 512,
+    "dimensions" : 768,
+    "publicationMs" : 220.299583
+  }, {
+    "trial" : 3,
+    "chunks" : 512,
+    "dimensions" : 768,
+    "publicationMs" : 218.516917
+  }, {
+    "trial" : 4,
+    "chunks" : 512,
+    "dimensions" : 768,
+    "publicationMs" : 221.843
+  } ],
+  "keywordEligibilityPlan" : [ {
+    "QUERY PLAN" : {
+      "null" : false,
+      "type" : "json",
+      "value" : "[\n  {\n    \"Plan\": {\n      \"Node Type\": \"Limit\",\n      \"Parallel Aware\": false,\n      \"Async Capable\": false,\n      \"Startup Cost\": 58.56,\n      \"Total Cost\": 58.56,\n      \"Plan Rows\": 1,\n      \"Plan Width\": 32,\n      \"Actual Startup Time\": 4.302,\n      \"Actual Total Time\": 4.307,\n      \"Actual Rows\": 40,\n      \"Actual Loops\": 1,\n      \"Shared Hit Blocks\": 6611,\n      \"Shared Read Blocks\": 0,\n      \"Shared Dirtied Blocks\": 0,\n      \"Shared Written Blocks\": 0,\n      \"Local Hit Blocks\": 0,\n      \"Local Read Blocks\": 0,\n      \"Local Dirtied Blocks\": 0,\n      \"Local Written Blocks\": 0,\n      \"Temp Read Blocks\": 0,\n      \"Temp Written Blocks\": 0,\n      \"Plans\": [\n        {\n          \"Node Type\": \"Sort\",\n          \"Parent Relationship\": \"Outer\",\n          \"Parallel Aware\": false,\n          \"Async Capable\": false,\n          \"Startup Cost\": 58.56,\n          \"Total Cost\": 58.56,\n          \"Plan Rows\": 1,\n          \"Plan Width\": 32,\n          \"Actual Startup Time\": 4.301,\n          \"Actual Total Time\": 4.304,\n          \"Actual Rows\": 40,\n          \"Actual Loops\": 1,\n          \"Sort Key\": [\"c.generation_id\", \"c.id\"],\n          \"Sort Method\": \"top-N heapsort\",\n          \"Sort Space Used\": 29,\n          \"Sort Space Type\": \"Memory\",\n          \"Shared Hit Blocks\": 6611,\n          \"Shared Read Blocks\": 0,\n          \"Shared Dirtied Blocks\": 0,\n          \"Shared Written Blocks\": 0,\n          \"Local Hit Blocks\": 0,\n          \"Local Read Blocks\": 0,\n          \"Local Dirtied Blocks\": 0,\n          \"Local Written Blocks\": 0,\n          \"Temp Read Blocks\": 0,\n          \"Temp Written Blocks\": 0,\n          \"Plans\": [\n            {\n              \"Node Type\": \"Nested Loop\",\n              \"Parent Relationship\": \"Outer\",\n              \"Parallel Aware\": false,\n              \"Async Capable\": false,\n              \"Join Type\": \"Inner\",\n              \"Startup Cost\": 28.97,\n              \"Total Cost\": 58.55,\n              \"Plan Rows\": 1,\n              \"Plan Width\": 32,\n              \"Actual Startup Time\": 0.093,\n              \"Actual Total Time\": 4.261,\n              \"Actual Rows\": 500,\n              \"Actual Loops\": 1,\n              \"Inner Unique\": true,\n              \"Shared Hit Blocks\": 6611,\n              \"Shared Read Blocks\": 0,\n              \"Shared Dirtied Blocks\": 0,\n              \"Shared Written Blocks\": 0,\n              \"Local Hit Blocks\": 0,\n              \"Local Read Blocks\": 0,\n              \"Local Dirtied Blocks\": 0,\n              \"Local Written Blocks\": 0,\n              \"Temp Read Blocks\": 0,\n              \"Temp Written Blocks\": 0,\n              \"Plans\": [\n                {\n                  \"Node Type\": \"Nested Loop\",\n                  \"Parent Relationship\": \"Outer\",\n                  \"Parallel Aware\": false,\n                  \"Async Capable\": false,\n                  \"Join Type\": \"Inner\",\n                  \"Startup Cost\": 28.70,\n                  \"Total Cost\": 58.05,\n                  \"Plan Rows\": 1,\n                  \"Plan Width\": 64,\n                  \"Actual Startup Time\": 0.089,\n                  \"Actual Total Time\": 3.933,\n                  \"Actual Rows\": 500,\n                  \"Actual Loops\": 1,\n                  \"Inner Unique\": true,\n                  \"Shared Hit Blocks\": 5110,\n                  \"Shared Read Blocks\": 0,\n                  \"Shared Dirtied Blocks\": 0,\n                  \"Shared Written Blocks\": 0,\n                  \"Local Hit Blocks\": 0,\n                  \"Local Read Blocks\": 0,\n                  \"Local Dirtied Blocks\": 0,\n                  \"Local Written Blocks\": 0,\n                  \"Temp Read Blocks\": 0,\n                  \"Temp Written Blocks\": 0,\n                  \"Plans\": [\n                    {\n                      \"Node Type\": \"Nested Loop\",\n                      \"Parent Relationship\": \"Outer\",\n                      \"Parallel Aware\": false,\n                      \"Async Capable\": false,\n                      \"Join Type\": \"Semi\",\n                      \"Startup Cost\": 28.42,\n                      \"Total Cost\": 57.53,\n                      \"Plan Rows\": 1,\n                      \"Plan Width\": 160,\n                      \"Actual Startup Time\": 0.087,\n                      \"Actual Total Time\": 3.568,\n                      \"Actual Rows\": 500,\n                      \"Actual Loops\": 1,\n                      \"Inner Unique\": false,\n                      \"Shared Hit Blocks\": 3610,\n                      \"Shared Read Blocks\": 0,\n                      \"Shared Dirtied Blocks\": 0,\n                      \"Shared Written Blocks\": 0,\n                      \"Local Hit Blocks\": 0,\n                      \"Local Read Blocks\": 0,\n                      \"Local Dirtied Blocks\": 0,\n                      \"Local Written Blocks\": 0,\n                      \"Temp Read Blocks\": 0,\n                      \"Temp Written Blocks\": 0,\n                      \"Plans\": [\n                        {\n                          \"Node Type\": \"Nested Loop\",\n                          \"Parent Relationship\": \"Outer\",\n                          \"Parallel Aware\": false,\n                          \"Async Capable\": false,\n                          \"Join Type\": \"Inner\",\n                          \"Startup Cost\": 28.42,\n                          \"Total Cost\": 55.43,\n                          \"Plan Rows\": 1,\n                          \"Plan Width\": 160,\n                          \"Actual Startup Time\": 0.083,\n                          \"Actual Total Time\": 3.058,\n                          \"Actual Rows\": 500,\n                          \"Actual Loops\": 1,\n                          \"Inner Unique\": false,\n                          \"Shared Hit Blocks\": 2610,\n                          \"Shared Read Blocks\": 0,\n                          \"Shared Dirtied Blocks\": 0,\n                          \"Shared Written Blocks\": 0,\n                          \"Local Hit Blocks\": 0,\n                          \"Local Read Blocks\": 0,\n                          \"Local Dirtied Blocks\": 0,\n                          \"Local Written Blocks\": 0,\n                          \"Temp Read Blocks\": 0,\n                          \"Temp Written Blocks\": 0,\n                          \"Plans\": [\n                            {\n                              \"Node Type\": \"Hash Join\",\n                              \"Parent Relationship\": \"Outer\",\n                              \"Parallel Aware\": false,\n                              \"Async Capable\": false,\n                              \"Join Type\": \"Inner\",\n                              \"Startup Cost\": 28.14,\n                              \"Total Cost\": 51.74,\n                              \"Plan Rows\": 1,\n                              \"Plan Width\": 177,\n                              \"Actual Startup Time\": 0.077,\n                              \"Actual Total Time\": 0.195,\n                              \"Actual Rows\": 515,\n                              \"Actual Loops\": 1,\n                              \"Inner Unique\": true,\n                              \"Hash Cond\": \"((d.id = h.document_id) AND (d.current_revision_id = h.revision_id))\",\n                              \"Shared Hit Blocks\": 25,\n                              \"Shared Read Blocks\": 0,\n                              \"Shared Dirtied Blocks\": 0,\n                              \"Shared Written Blocks\": 0,\n                              \"Local Hit Blocks\": 0,\n                              \"Local Read Blocks\": 0,\n                              \"Local Dirtied Blocks\": 0,\n                              \"Local Written Blocks\": 0,\n                              \"Temp Read Blocks\": 0,\n                              \"Temp Written Blocks\": 0,\n                              \"Plans\": [\n                                {\n                                  \"Node Type\": \"Seq Scan\",\n                                  \"Parent Relationship\": \"Outer\",\n                                  \"Parallel Aware\": false,\n                                  \"Async Capable\": false,\n                                  \"Relation Name\": \"documents\",\n                                  \"Alias\": \"d\",\n                                  \"Startup Cost\": 0.00,\n                                  \"Total Cost\": 20.89,\n                                  \"Plan Rows\": 515,\n                                  \"Plan Width\": 48,\n                                  \"Actual Startup Time\": 0.007,\n                                  \"Actual Total Time\": 0.056,\n                                  \"Actual Rows\": 515,\n                                  \"Actual Loops\": 1,\n                                  \"Filter\": \"((organization_id = 'd31e9527-6916-4792-95b9-bb44dc3828df'::uuid) AND ((status)::text = 'AVAILABLE'::text))\",\n                                  \"Rows Removed by Filter\": 78,\n                                  \"Shared Hit Blocks\": 12,\n                                  \"Shared Read Blocks\": 0,\n                                  \"Shared Dirtied Blocks\": 0,\n                                  \"Shared Written Blocks\": 0,\n                                  \"Local Hit Blocks\": 0,\n                                  \"Local Read Blocks\": 0,\n                                  \"Local Dirtied Blocks\": 0,\n                                  \"Local Written Blocks\": 0,\n                                  \"Temp Read Blocks\": 0,\n                                  \"Temp Written Blocks\": 0\n                                },\n                                {\n                                  \"Node Type\": \"Hash\",\n                                  \"Parent Relationship\": \"Inner\",\n                                  \"Parallel Aware\": false,\n                                  \"Async Capable\": false,\n                                  \"Startup Cost\": 20.41,\n                                  \"Total Cost\": 20.41,\n                                  \"Plan Rows\": 515,\n                                  \"Plan Width\": 129,\n                                  \"Actual Startup Time\": 0.066,\n                                  \"Actual Total Time\": 0.067,\n                                  \"Actual Rows\": 515,\n                                  \"Actual Loops\": 1,\n                                  \"Hash Buckets\": 1024,\n                                  \"Original Hash Buckets\": 1024,\n                                  \"Hash Batches\": 1,\n                                  \"Original Hash Batches\": 1,\n                                  \"Peak Memory Usage\": 89,\n                                  \"Shared Hit Blocks\": 13,\n                                  \"Shared Read Blocks\": 0,\n                                  \"Shared Dirtied Blocks\": 0,\n                                  \"Shared Written Blocks\": 0,\n                                  \"Local Hit Blocks\": 0,\n                                  \"Local Read Blocks\": 0,\n                                  \"Local Dirtied Blocks\": 0,\n                                  \"Local Written Blocks\": 0,\n                                  \"Temp Read Blocks\": 0,\n                                  \"Temp Written Blocks\": 0,\n                                  \"Plans\": [\n                                    {\n                                      \"Node Type\": \"Seq Scan\",\n                                      \"Parent Relationship\": \"Outer\",\n                                      \"Parallel Aware\": false,\n                                      \"Async Capable\": false,\n                                      \"Relation Name\": \"document_index_heads\",\n                                      \"Alias\": \"h\",\n                                      \"Startup Cost\": 0.00,\n                                      \"Total Cost\": 20.41,\n                                      \"Plan Rows\": 515,\n                                      \"Plan Width\": 129,\n                                      \"Actual Startup Time\": 0.005,\n                                      \"Actual Total Time\": 0.035,\n                                      \"Actual Rows\": 515,\n                                      \"Actual Loops\": 1,\n                                      \"Filter\": \"(organization_id = 'd31e9527-6916-4792-95b9-bb44dc3828df'::uuid)\",\n                                      \"Rows Removed by Filter\": 78,\n                                      \"Shared Hit Blocks\": 13,\n                                      \"Shared Read Blocks\": 0,\n                                      \"Shared Dirtied Blocks\": 0,\n                                      \"Shared Written Blocks\": 0,\n                                      \"Local Hit Blocks\": 0,\n                                      \"Local Read Blocks\": 0,\n                                      \"Local Dirtied Blocks\": 0,\n                                      \"Local Written Blocks\": 0,\n                                      \"Temp Read Blocks\": 0,\n                                      \"Temp Written Blocks\": 0\n                                    }\n                                  ]\n                                }\n                              ]\n                            },\n                            {\n                              \"Node Type\": \"Index Scan\",\n                              \"Parent Relationship\": \"Inner\",\n                              \"Parallel Aware\": false,\n                              \"Async Capable\": false,\n                              \"Scan Direction\": \"Forward\",\n                              \"Index Name\": \"document_chunks_tenant\",\n                              \"Relation Name\": \"document_chunks\",\n                              \"Alias\": \"c\",\n                              \"Startup Cost\": 0.28,\n                              \"Total Cost\": 3.68,\n                              \"Plan Rows\": 1,\n                              \"Plan Width\": 145,\n                              \"Actual Startup Time\": 0.005,\n                              \"Actual Total Time\": 0.005,\n                              \"Actual Rows\": 1,\n                              \"Actual Loops\": 515,\n                              \"Index Cond\": \"((organization_id = 'd31e9527-6916-4792-95b9-bb44dc3828df'::uuid) AND (revision_id = h.revision_id) AND (generation_id = h.generation_id))\",\n                              \"Rows Removed by Index Recheck\": 0,\n                              \"Filter\": \"((terms @@ '''http'' & ''503'''::tsquery) AND (h.document_id = document_id) AND ((h.configuration_id)::text = (configuration_id)::text))\",\n                              \"Rows Removed by Filter\": 8,\n                              \"Shared Hit Blocks\": 2585,\n                              \"Shared Read Blocks\": 0,\n                              \"Shared Dirtied Blocks\": 0,\n                              \"Shared Written Blocks\": 0,\n                              \"Local Hit Blocks\": 0,\n                              \"Local Read Blocks\": 0,\n                              \"Local Dirtied Blocks\": 0,\n                              \"Local Written Blocks\": 0,\n                              \"Temp Read Blocks\": 0,\n                              \"Temp Written Blocks\": 0\n                            }\n                          ]\n                        },\n                        {\n                          \"Node Type\": \"Nested Loop\",\n                          \"Parent Relationship\": \"Inner\",\n                          \"Parallel Aware\": false,\n                          \"Async Capable\": false,\n                          \"Join Type\": \"Inner\",\n                          \"Startup Cost\": 0.00,\n                          \"Total Cost\": 2.10,\n                          \"Plan Rows\": 1,\n                          \"Plan Width\": 16,\n                          \"Actual Startup Time\": 0.001,\n                          \"Actual Total Time\": 0.001,\n                          \"Actual Rows\": 1,\n                          \"Actual Loops\": 500,\n                          \"Inner Unique\": true,\n                          \"Join Filter\": \"(m.user_id = u.id)\",\n                          \"Rows Removed by Join Filter\": 0,\n                          \"Shared Hit Blocks\": 1000,\n                          \"Shared Read Blocks\": 0,\n                          \"Shared Dirtied Blocks\": 0,\n                          \"Shared Written Blocks\": 0,\n                          \"Local Hit Blocks\": 0,\n                          \"Local Read Blocks\": 0,\n                          \"Local Dirtied Blocks\": 0,\n                          \"Local Written Blocks\": 0,\n                          \"Temp Read Blocks\": 0,\n                          \"Temp Written Blocks\": 0,\n                          \"Plans\": [\n                            {\n                              \"Node Type\": \"Seq Scan\",\n                              \"Parent Relationship\": \"Outer\",\n                              \"Parallel Aware\": false,\n                              \"Async Capable\": false,\n                              \"Relation Name\": \"organization_memberships\",\n                              \"Alias\": \"m\",\n                              \"Startup Cost\": 0.00,\n                              \"Total Cost\": 1.04,\n                              \"Plan Rows\": 1,\n                              \"Plan Width\": 32,\n                              \"Actual Startup Time\": 0.000,\n                              \"Actual Total Time\": 0.000,\n                              \"Actual Rows\": 1,\n                              \"Actual Loops\": 500,\n                              \"Filter\": \"(organization_id = 'd31e9527-6916-4792-95b9-bb44dc3828df'::uuid)\",\n                              \"Rows Removed by Filter\": 2,\n                              \"Shared Hit Blocks\": 500,\n                              \"Shared Read Blocks\": 0,\n                              \"Shared Dirtied Blocks\": 0,\n                              \"Shared Written Blocks\": 0,\n                              \"Local Hit Blocks\": 0,\n                              \"Local Read Blocks\": 0,\n                              \"Local Dirtied Blocks\": 0,\n                              \"Local Written Blocks\": 0,\n                              \"Temp Read Blocks\": 0,\n                              \"Temp Written Blocks\": 0\n                            },\n                            {\n                              \"Node Type\": \"Seq Scan\",\n                              \"Parent Relationship\": \"Inner\",\n                              \"Parallel Aware\": false,\n                              \"Async Capable\": false,\n                              \"Relation Name\": \"app_users\",\n                              \"Alias\": \"u\",\n                              \"Startup Cost\": 0.00,\n                              \"Total Cost\": 1.04,\n                              \"Plan Rows\": 1,\n                              \"Plan Width\": 16,\n                              \"Actual Startup Time\": 0.000,\n                              \"Actual Total Time\": 0.000,\n                              \"Actual Rows\": 1,\n                              \"Actual Loops\": 500,\n                              \"Filter\": \"(((issuer)::text = 'https://evaluation.invalid'::text) AND ((subject)::text = 'performance'::text))\",\n                              \"Rows Removed by Filter\": 2,\n                              \"Shared Hit Blocks\": 500,\n                              \"Shared Read Blocks\": 0,\n                              \"Shared Dirtied Blocks\": 0,\n                              \"Shared Written Blocks\": 0,\n                              \"Local Hit Blocks\": 0,\n                              \"Local Read Blocks\": 0,\n                              \"Local Dirtied Blocks\": 0,\n                              \"Local Written Blocks\": 0,\n                              \"Temp Read Blocks\": 0,\n                              \"Temp Written Blocks\": 0\n                            }\n                          ]\n                        }\n                      ]\n                    },\n                    {\n                      \"Node Type\": \"Index Scan\",\n                      \"Parent Relationship\": \"Inner\",\n                      \"Parallel Aware\": false,\n                      \"Async Capable\": false,\n                      \"Scan Direction\": \"Forward\",\n                      \"Index Name\": \"document_revisions_document_id_revision_number_key\",\n                      \"Relation Name\": \"document_revisions\",\n                      \"Alias\": \"r\",\n                      \"Startup Cost\": 0.28,\n                      \"Total Cost\": 0.51,\n                      \"Plan Rows\": 1,\n                      \"Plan Width\": 48,\n                      \"Actual Startup Time\": 0.001,\n                      \"Actual Total Time\": 0.001,\n                      \"Actual Rows\": 1,\n                      \"Actual Loops\": 500,\n                      \"Index Cond\": \"(document_id = h.document_id)\",\n                      \"Rows Removed by Index Recheck\": 0,\n                      \"Filter\": \"((organization_id = 'd31e9527-6916-4792-95b9-bb44dc3828df'::uuid) AND ((status)::text = 'AVAILABLE'::text) AND (h.revision_id = id))\",\n                      \"Rows Removed by Filter\": 0,\n                      \"Shared Hit Blocks\": 1500,\n                      \"Shared Read Blocks\": 0,\n                      \"Shared Dirtied Blocks\": 0,\n                      \"Shared Written Blocks\": 0,\n                      \"Local Hit Blocks\": 0,\n                      \"Local Read Blocks\": 0,\n                      \"Local Dirtied Blocks\": 0,\n                      \"Local Written Blocks\": 0,\n                      \"Temp Read Blocks\": 0,\n                      \"Temp Written Blocks\": 0\n                    }\n                  ]\n                },\n                {\n                  \"Node Type\": \"Index Scan\",\n                  \"Parent Relationship\": \"Inner\",\n                  \"Parallel Aware\": false,\n                  \"Async Capable\": false,\n                  \"Scan Direction\": \"Forward\",\n                  \"Index Name\": \"index_generations_pkey\",\n                  \"Relation Name\": \"index_generations\",\n                  \"Alias\": \"g\",\n                  \"Startup Cost\": 0.28,\n                  \"Total Cost\": 0.49,\n                  \"Plan Rows\": 1,\n                  \"Plan Width\": 32,\n                  \"Actual Startup Time\": 0.001,\n                  \"Actual Total Time\": 0.001,\n                  \"Actual Rows\": 1,\n                  \"Actual Loops\": 500,\n                  \"Index Cond\": \"(id = h.generation_id)\",\n                  \"Rows Removed by Index Recheck\": 0,\n                  \"Filter\": \"((organization_id = 'd31e9527-6916-4792-95b9-bb44dc3828df'::uuid) AND ((status)::text = 'INDEXED'::text))\",\n                  \"Rows Removed by Filter\": 0,\n                  \"Shared Hit Blocks\": 1500,\n                  \"Shared Read Blocks\": 0,\n                  \"Shared Dirtied Blocks\": 0,\n                  \"Shared Written Blocks\": 0,\n                  \"Local Hit Blocks\": 0,\n                  \"Local Read Blocks\": 0,\n                  \"Local Dirtied Blocks\": 0,\n                  \"Local Written Blocks\": 0,\n                  \"Temp Read Blocks\": 0,\n                  \"Temp Written Blocks\": 0\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    \"Planning\": {\n      \"Shared Hit Blocks\": 429,\n      \"Shared Read Blocks\": 0,\n      \"Shared Dirtied Blocks\": 0,\n      \"Shared Written Blocks\": 0,\n      \"Local Hit Blocks\": 0,\n      \"Local Read Blocks\": 0,\n      \"Local Dirtied Blocks\": 0,\n      \"Local Written Blocks\": 0,\n      \"Temp Read Blocks\": 0,\n      \"Temp Written Blocks\": 0\n    },\n    \"Planning Time\": 6.142,\n    \"Triggers\": [\n    ],\n    \"Execution Time\": 4.331\n  }\n]"
+    }
+  } ],
+  "environment" : {
+    "os" : "Mac OS X",
+    "pgvector" : "0.8.7",
+    "java" : "21.0.12.1",
+    "postgres" : "17.11 (Debian 17.11-1.pgdg12+2)"
+  },
+  "limitations" : [ "Warm sequential local Testcontainers; not concurrent load or production throughput", "Pipeline uses fixture vectors and TXT/Markdown, excludes real inference and PDF cost", "Publication directly constructs near-limit derived blocks; source bytes are synthetic fixture metadata", "Five publication samples per size; no unsupported pass/fail latency threshold", "Plan is representative keyword eligibility SQL, not an exact ranked search-plan capture" ]
+}

@@ -1,0 +1,122 @@
+{
+  "evaluatedAtUTC": "2026-10-14T18:57:06.976450+00:00",
+  "branch": "codex/m15-security-evaluation",
+  "baselineRevision": "d6ae8a1a5e23fc109cf93ee53793d0170821b618",
+  "maven": [
+    {
+      "name": "clean-test",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw clean test",
+      "tests": 234,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "01:35 min",
+      "log": "/tmp/traceback-m15-final-test.log"
+    },
+    {
+      "name": "verify",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw verify",
+      "tests": 234,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "01:32 min",
+      "log": "/tmp/traceback-m15-final-verify.log"
+    },
+    {
+      "name": "security-regression",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw -Dtest=RestJwtValidationIntegrationTest,OrganizationApiIntegrationTest,IncidentApiIntegrationTest,DocumentApiIntegrationTest,LocalDocumentStorageTest,IndexIntegrationTest,ConversationIntegrationTest,ChatIntegrationTest,RagContextTest,McpJwtValidationTest,McpBoundaryTest,McpToolLimitTest,McpIntegrationTest,DurableIngestionIntegrationTest,ExtractionTest test",
+      "tests": 208,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "01:17 min",
+      "log": "/tmp/traceback-m15-security-regression.log"
+    },
+    {
+      "name": "retrieval-deterministic",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw -Dtest=M15RetrievalEvaluationTest -Dtraceback.evaluation.output-dir=../evaluations/m15 test",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "13.269 s",
+      "log": "/tmp/traceback-m15-retrieval-final-deterministic.log"
+    },
+    {
+      "name": "retrieval-live",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw -Dtest=M15RetrievalEvaluationTest -Dtraceback.evaluation.live-embeddings=true -Dtraceback.evaluation.output-dir=../evaluations/m15 test",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "23.090 s",
+      "log": "/tmp/traceback-m15-retrieval-final-live.log"
+    },
+    {
+      "name": "performance",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw -Dtest=M15PerformanceEvaluation -Dtraceback.evaluation.output-dir=../evaluations/m15 test",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "31.280 s",
+      "log": "/tmp/traceback-m15-performance-final.log"
+    },
+    {
+      "name": "bounded-chat-retry",
+      "cwd": "backend",
+      "command": "JAVA_HOME=$(/usr/libexec/java_home -v 21) ./mvnw -Dtest=M15RagModelEvaluation test",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "totalTime": "03:18 min",
+      "log": "/tmp/traceback-m15-rag-retry.log"
+    }
+  ],
+  "otherChecks": {
+    "pythonAuthenticationHelpers": "20 tests, OK",
+    "composeBase": "config --quiet exit 0",
+    "composeAllProfiles": "config --quiet exit 0",
+    "composePs": "five project services running, host ports loopback only",
+    "workflowYaml": "parsed via Ruby standard YAML; expected two jobs/steps",
+    "diffWhitespace": "git diff --check exit 0",
+    "historicalDataFiles": "migrations, M12/M13 evaluations and Compose files unchanged",
+    "jwtShapedValuesInM15Logs": 0
+  },
+  "selectedVersions": {
+    "jackson3": "3.1.7",
+    "tomcat": "11.0.26",
+    "commonmark": "0.25.1"
+  },
+  "artifactSha256": {
+    "adversarial-dataset.json": "9b76924ba214d04a43015043b67aa04eedbe65fdc922ac065ce1a3dae6daec13",
+    "retrieval-deterministic.json": "86c9f2c8e91e5b8cd509838ff370b76059480e1997a1205b5219db5170b06e80",
+    "retrieval-live.json": "fd589f8ff0a4977addbb04f45089c93b029dd8a7e4a0936f5dd41a16e8084afb",
+    "rag-live.json": "409519ebb89bff750a18b5105d6c3af60e558ddb765f1a9d80943292ba1f8e73",
+    "adversarial-deterministic.json": "977ec26d5fda71fed9d636b217000914d5cca817d57c117c3987b0451591f017",
+    "retrieval-dataset.json": "b3a9e62ccce135ac678470f8fcac571a58c721bb336230e725c611af0debb1d4",
+    "rag-live-memory-failure.json": "c0afbc375df72d15448aa73aac569c4c37f90cca948d9fd4a2ca6f1ec57bd977",
+    "rag-dataset.json": "b59bca99c01226da7702261bc27bf0e984e82701ec9767dc6b51be40ddc4ba26",
+    "rag-live-small-context-failure.json": "2ae7a066e09284403ffa27ed7d3dd87735665c51172025088d1154ea5f65dc3e",
+    "performance-initial.json": "db916f2b14cbe4bf76022a81950c9fe0d97fc308e6a4d1fbea310cb8998a5e34",
+    "rag-claim-review.json": "53b0bf1ceaa10ae10da3b9388d107884fb99b7af2ada9a4654a7526e187caa30",
+    "performance.json": "e6245de120cfd16a564a71955032b43330728c3fffe94e41932bc9f3535a2a34",
+    "dependencies-before.json": "e854c51990041a4ce4cc486b009e8f6cd352864cde87c7ee3684fa0064988030",
+    "rag-deterministic.json": "95a6d72c4cc55c007812f49e77060fe1a3608bd6f28c1cf321ff8ac8120079df",
+    "mcp-performance.json": "fdd42e332d4a3afc1d6ac3568e9973e587d64fe6cb86db6dad0de1288d42d2a4",
+    "scans.json": "f5cb3d2e656b9c63677f8549810b84ab33e4b110cb326f0db322912127f961a1"
+  },
+  "limitations": [
+    "Hosted GitHub CI not executed",
+    "Historical citation read tightening tested separately after live generation started; generation prompt/provider/parser unchanged",
+    "No production AWS/IAM/TLS/OIDC or image CVE certification"
+  ]
+}

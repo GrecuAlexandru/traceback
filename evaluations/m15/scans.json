@@ -1,0 +1,17 @@
+{
+  "evaluatedAtUTC": "2026-10-14T18:55:59.233313+00:00",
+  "sbomSha256": "f247e7c4bd12ecfe9e1aa2600aa556c133215a3b96a123cdbaca2aea81ac746c",
+  "packagesInSbom": 237,
+  "gitleaksVersion": "8.30.1",
+  "osvVersion": "osv-scanner version: 2.7.0",
+  "gitleaksExitCode": 0,
+  "osvExitCode": 0,
+  "secretFindings": 0,
+  "vulnerablePackages": 0,
+  "advisories": [],
+  "limitations": [
+    "Current nonignored source, not Git history or ignored local credentials",
+    "OSV online vulnerability database and GitHub release downloads are network dependencies",
+    "SBOM package match does not establish exploit reachability; no container image vulnerability scan"
+  ]
+}

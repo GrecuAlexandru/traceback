@@ -55,6 +55,50 @@ class RagContextTest {
         assertThrows(ChatFailure.class,()->context.validate("{\"status\":\"INSUFFICIENT_EVIDENCE\",\"answer\":\"Fake [S1]\",\"references\":[]}",List.of()));
         assertEquals(RagContext.ABSTENTION,context.validate("{\"status\":\"INSUFFICIENT_EVIDENCE\",\"answer\":\"Untrusted invented details\",\"references\":[]}",List.of()).content());
     }
+    @Test void fabricatedNamespacesExternalFootnotesAndMalformedReferencesFailClosed() {
+        var evidence=context.prepare("HTTP 503",List.of(),List.of(candidate("Connections exhausted."))).evidence();
+        var json=tools.jackson.databind.json.JsonMapper.builder().build();
+        for(String value:List.of("Claim [H1]", "Claim [DOC42]", "Claim [document 42]", "Claim [REF2]",
+                "Claim [source: invented]", "Claim [citation: 42]", "Claim [H1", "Claim [S 1]",
+                "Claim [1](https://fabricated.invalid/paper)", "Claim [source 42](https://fabricated.invalid)",
+                "Claim [^invented]", "Claim [S1] [DOC42]", "Claim [S1] [H1]", "[S1]: https://fabricated.invalid",
+                "\\` [DOC42] `", "\\` [H1] \\`", "Claim [D**OC42**]", "Claim [S1][alias]\n\n[alias]: https://fabricated.invalid",
+                "Claim [D<strong>OC42</strong>]", "Claim [S&#57;99]", "<div>[DOC42]</div>")) {
+            String output=json.writeValueAsString(Map.of("status","ANSWERED","answer",value,"references",List.of("S1")));
+            assertEquals("INVALID_CITATION",assertThrows(ChatFailure.class,()->context.validate(output,evidence)).code(),value);
+        }
+    }
+    @Test void codeExamplesAreLiteralAndNeverSupplyCitationAuthority() {
+        var evidence=context.prepare("HTTP 503",List.of(),List.of(candidate("Connections exhausted."))).evidence();
+        var json=tools.jackson.databind.json.JsonMapper.builder().build();
+        String prose="Use `[H1]`, `array[S999]` and ``value ` [DOC42]``.\n"
+                +"```java\nString example = \"[source: invented]\";\n```\n"
+                +"~~~text\n[DOC42] [S999]\n~~~\n"
+                +"> ```text\n> [DOC42] [S999]\n> ```\n\n"
+                +"    [DOC42] [S999]\n\n"
+                +"[SRE] [HTTP503] [AUTH_TOKEN_EXPIRED] values[0] [1, 2] [RFC9110] "
+                +"[source code](https://example.invalid/source) [guide][manual]. [S1]\n"
+                +"[manual]: https://example.invalid/guide";
+        assertEquals(prose,context.validate(json.writeValueAsString(Map.of("status","ANSWERED","answer",prose,"references",List.of("S1"))),evidence).content());
+        for(String code:List.of("`[S1]`", "```text\n[S1]\n```", "~~~\n[S1]\n~~~")) {
+            assertEquals("MISSING_CITATION",assertThrows(ChatFailure.class,()->context.validate(
+                    json.writeValueAsString(Map.of("status","ANSWERED","answer",code,"references",List.of())),evidence)).code());
+        }
+        String code="```text\n[DOC42]";
+        assertEquals("[S1]\n\n"+code,context.validate(json.writeValueAsString(
+                Map.of("status","ANSWERED","answer",code,"references",List.of("S1"))),evidence).content());
+        String nested="> ```text\n> example";
+        assertEquals("[S1]\n\n"+nested,context.validate(json.writeValueAsString(
+                Map.of("status","ANSWERED","answer",nested,"references",List.of("S1"))),evidence).content());
+    }
+    @Test void inlineAndExplicitStructuredSelectionsCannotContradictEachOther() {
+        var evidence=context.prepare("HTTP 503",List.of(),List.of(candidate("First"),candidate("Second"))).evidence();
+        var json=tools.jackson.databind.json.JsonMapper.builder().build();
+        assertEquals("INVALID_CITATION",assertThrows(ChatFailure.class,()->context.validate(json.writeValueAsString(
+                Map.of("status","ANSWERED","answer","Claim [S2]","references",List.of("S1"))),evidence)).code());
+        assertEquals(Set.of("S1","S2"),context.validate(json.writeValueAsString(
+                Map.of("status","ANSWERED","answer","Claim [S2]","references",List.of("S1","S2"))),evidence).references());
+    }
     @Test void deterministicFollowupQueryRetainsTopicWithinM12Limits() {
         var query=context.query("What did the team do to fix it?",List.of(new RagContext.History("USER","Why did PostgreSQL connections fail?")));
         assertTrue(query.contains("PostgreSQL"));assertTrue(query.split(" ").length<=16);assertTrue(query.length()<=256);

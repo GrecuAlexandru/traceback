@@ -1,0 +1,113 @@
+{
+  "scanner": "OSV Scanner 2.7.0, online OSV database",
+  "packagesInOriginalSbom": 237,
+  "vulnerablePackages": [
+    {
+      "package": "tools.jackson.core:jackson-core",
+      "version": "3.1.5",
+      "advisories": [
+        {
+          "id": "GHSA-7hhh-6rmp-j9qf",
+          "aliases": [
+            "CVE-2026-89425"
+          ],
+          "databaseSeverity": "HIGH",
+          "summary": "jackson-core: UTF8DataInputJsonParser._reportInvalidToken() missing maxErrorTokenLength limit -> unbounded StringBuilder growth (DoS)"
+        },
+        {
+          "id": "GHSA-p6pp-m3f8-5c89",
+          "aliases": [
+            "CVE-2026-89407"
+          ],
+          "databaseSeverity": "HIGH",
+          "summary": " jackson-core: ReDoS: quadratic backtracking in NumberInput.PATTERN_FLOAT via looksLikeValidNumber()"
+        }
+      ]
+    },
+    {
+      "package": "tools.jackson.core:jackson-databind",
+      "version": "3.1.5",
+      "advisories": [
+        {
+          "id": "GHSA-cxp5-3px4-pw24",
+          "aliases": [
+            "CVE-2026-91777"
+          ],
+          "databaseSeverity": "HIGH",
+          "summary": "jackson-databind quadratic forward-reference completion "
+        },
+        {
+          "id": "GHSA-gx83-3vf8-gh7j",
+          "aliases": [
+            "CVE-2026-83557"
+          ],
+          "databaseSeverity": "MODERATE",
+          "summary": "jackson-databind: Comparable missing from DefaultBaseTypeLimitingValidator's unsafe base types (incomplete PolymorphicTypeValidator denylist)"
+        },
+        {
+          "id": "GHSA-q4xh-88c3-wmh7",
+          "aliases": [
+            "CVE-2026-68497"
+          ],
+          "databaseSeverity": "HIGH",
+          "summary": "jackson-databind: Duration XMLGregorianCalendar Unbounded Number Parse DoS"
+        },
+        {
+          "id": "GHSA-wjgm-6hv5-3cvf",
+          "aliases": [
+            "CVE-2026-19032"
+          ],
+          "databaseSeverity": "MODERATE",
+          "summary": "jackson-databind: Path Deserialization Missing Scheme Allowlist for FileSystemProvider Resolution"
+        },
+        {
+          "id": "GHSA-wv8q-qhhj-9h54",
+          "aliases": [
+            "CVE-2026-91776"
+          ],
+          "databaseSeverity": "HIGH",
+          "summary": "jackson-databind retains every unknown raw type ID "
+        }
+      ]
+    },
+    {
+      "package": "org.apache.tomcat.embed:tomcat-embed-core",
+      "version": "11.0.24",
+      "advisories": [
+        {
+          "id": "GHSA-9xv2-5v5q-p794",
+          "aliases": [
+            "BIT-tomcat-2026-65905",
+            "CVE-2026-65905"
+          ],
+          "databaseSeverity": "CRITICAL",
+          "summary": "Apache Tomcat's DIGEST authenticator has an Authentication Bypass by Capture-replay vulnerability"
+        },
+        {
+          "id": "GHSA-gcx9-497g-6cp6",
+          "aliases": [
+            "BIT-tomcat-2026-65182",
+            "CVE-2026-65182"
+          ],
+          "databaseSeverity": "CRITICAL",
+          "summary": "Apache Tomcat has an Improper Access Control, Incorrect Authorization vulnerability"
+        },
+        {
+          "id": "GHSA-h3x4-894j-xpx5",
+          "aliases": [
+            "BIT-tomcat-2026-68525",
+            "CVE-2026-68525"
+          ],
+          "databaseSeverity": "CRITICAL",
+          "summary": "Apache Tomcat's FORM authentication process has an Incorrect Authorization vulnerability"
+        }
+      ]
+    }
+  ],
+  "advisoryCount": 10,
+  "interpretation": "Dependency matches, not demonstrated application bypasses. Tomcat DIGEST/FORM mechanisms are disabled; HTTP/2/AJP/WebSocket are not configured product interfaces. Jackson special-type/polymorphic findings require unavailable configurations/types. Apply compatible patch lines without suppressing findings.",
+  "corrections": {
+    "tools.jackson": "3.1.5 -> 3.1.7 BOM",
+    "tomcat": "11.0.24 -> 11.0.26"
+  }
+}

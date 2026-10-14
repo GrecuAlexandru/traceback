@@ -1,0 +1,7 @@
+{
+  "restHttpReadMs" : [ 4.691625, 3.527667, 3.658791, 3.160334, 3.119542, 3.208625, 2.978708, 3.761167, 3.449083, 2.997541, 3.804583, 3.517125, 2.700041, 3.284833, 2.929875, 2.870792, 3.608041, 3.579917, 3.654, 3.698334 ],
+  "mcpSdkInvocationMs" : [ 4.593041, 10.702667, 3.791375, 4.397084, 3.964583, 4.531583, 3.955, 4.291542, 4.949, 3.730583, 4.196375, 4.678416, 3.946292, 4.0655, 4.431208, 3.672125, 4.707625, 4.851833, 4.577542, 6.320125 ],
+  "limitations" : "Sequential loopback official SDK versus REST with the same short incident and real Keycloak JWTs; includes HTTP/auth/service work, not isolated transport CPU.",
+  "samplesPerPath" : 20,
+  "warmupPerPath" : 3
+}
