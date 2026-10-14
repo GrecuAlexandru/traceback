@@ -14,7 +14,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http) throws Exception {
+            HttpSecurity http, @org.springframework.beans.factory.annotation.Value("${traceback.runtime:api}") String runtime) throws Exception {
+        if (runtime.equals("worker")) {
+            return http.csrf(AbstractHttpConfigurer::disable).httpBasic(AbstractHttpConfigurer::disable)
+                    .formLogin(AbstractHttpConfigurer::disable)
+                    .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .authorizeHttpRequests(a -> a.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                            .anyRequest().denyAll()).build();
+        }
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -32,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/ping",
                                 "/actuator/health",
+                                "/actuator/health/**",
                                 "/error"
                         ).permitAll()
 

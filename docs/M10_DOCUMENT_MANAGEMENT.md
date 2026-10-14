@@ -1,6 +1,8 @@
 # M10 — Knowledge base and document management
 
-Implemented locally on 2026-10-13; pending user review. M9A/M9B and the previously verified Keycloak configuration are preserved. This milestone contains document management only: no extraction, OCR, embeddings, RAG, MCP, AWS, queues, or frontend.
+Implemented locally on 2026-10-13; subsequently approved for local development. M9A/M9B and the previously verified Keycloak configuration are preserved. This milestone contains document management only: no extraction, OCR, embeddings, RAG, MCP, AWS, queues, or frontend.
+
+This document records the M10 baseline. M11 extends its storage abstraction and adds preparation jobs while preserving these contracts; see [M11_DURABLE_INGESTION.md](M11_DURABLE_INGESTION.md) for current multi-process worker behavior.
 
 ## API contract
 

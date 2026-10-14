@@ -1,0 +1,17 @@
+traceback:
+  runtime: worker
+  aws:
+    enabled: true
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 3
+server:
+  port: 8081
+management:
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: readinessState,db,ingestionDependencies

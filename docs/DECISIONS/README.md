@@ -15,8 +15,10 @@ ADRs record durable engineering trade-offs. They prevent later AI sessions from 
 | [0001](0001-modular-monolith.md) | Modular monolith with separate runtime roles | Accepted |
 | [0002](0002-identity-and-tenant-security.md) | OIDC identity and application-owned authorization | Accepted |
 | [0003](0003-postgresql-flyway-and-pgvector.md) | PostgreSQL + Flyway, pgvector when needed | Accepted |
-| [0004](0004-durable-ingestion-aws.md) | Durable document ingestion via AWS S3/SQS | Accepted; planned |
+| [0004](0004-durable-ingestion-aws.md) | Durable document ingestion via AWS S3/SQS | Accepted; M11 local implementation |
 | [0005](0005-rag-and-mcp-trust-boundaries.md) | Permission-aware retrieval and MCP tools | Accepted; planned |
+
+| [0006](0006-ingestion-leases-and-storage-compatibility.md) | Token leases, explicit provider compatibility, generation retry | Accepted for M11 implementation; review pending |
 
 ## Creating a new ADR
 

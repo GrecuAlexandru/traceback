@@ -33,3 +33,5 @@ Use a standard OIDC identity provider (Keycloak locally) and Spring Security OAu
 
 
 **CURRENT M10:** Document/revision metadata, counts, downloads and writes reuse the human/membership policy. Read SQL includes tenant and identity predicates; write SQL also checks ADMIN/ENGINEER. Composite foreign keys prevent foreign document/revision pointers. Downloads recheck persisted access immediately before bounded file reads. Tombstones hide current and historical content. JWT and live Keycloak configuration are unchanged. See [M10](../M10_DOCUMENT_MANAGEMENT.md).
+
+**CURRENT M11:** Preparation status reads reuse human/membership/document/revision checks. Workers validate all message references against database-owned events and composite tenant metadata before content access; payload roles/organization IDs are never authority. Tombstones and supersession fence completion. Worker HTTP denies application routes; no public retry or download bypass. Local emulator ACL/public-block checks do not establish production IAM enforcement.

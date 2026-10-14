@@ -25,6 +25,10 @@ public class DocumentUploadRecovery {
     private final DocumentStorage storage;
     private final TransactionTemplate transaction;
     private Connection runtimeLock;
+    @org.springframework.beans.factory.annotation.Value("${traceback.runtime:api}")
+    private String runtime;
+    @org.springframework.beans.factory.annotation.Value("${traceback.aws.enabled:false}")
+    private boolean awsEnabled;
 
     public DocumentUploadRecovery(JdbcTemplate jdbc, DataSource datasource, DocumentStorage storage, PlatformTransactionManager manager) {
         this.jdbc = jdbc;
@@ -37,6 +41,10 @@ public class DocumentUploadRecovery {
 
     @PostConstruct
     public void start() throws SQLException, IOException {
+        if ("worker".equals(runtime)) {
+            if (!awsEnabled) throw new IllegalStateException("Worker requires local AWS configuration");
+            return;
+        }
         // M10 is intentionally a single backend process per database. A session lock
         // prevents startup recovery from cancelling another process's live upload.
         runtimeLock = datasource.getConnection();
@@ -63,9 +71,9 @@ public class DocumentUploadRecovery {
         var attempts = jdbc.query("SELECT organization_id, document_id, id FROM document_revisions WHERE status = 'UPLOADING'",
                 (r, n) -> new UUID[]{r.getObject(1, UUID.class), r.getObject(2, UUID.class), r.getObject(3, UUID.class)});
         for (var attempt : attempts) fail(attempt[0], attempt[1], attempt[2]);
-        var keys = jdbc.query("SELECT storage_key FROM document_revisions WHERE status = 'FAILED'", (r, n) -> r.getObject(1, UUID.class));
+        var keys = jdbc.query("SELECT storage_provider, storage_key FROM document_revisions WHERE status = 'FAILED'", (r, n) -> new StorageObject(r.getString(1), r.getObject(2, UUID.class)));
         // Fail startup if reconciliation cannot finish; do not advertise a healthy runtime.
-        for (UUID key : keys) storage.delete(key);
+        for (var object : keys) storage.delete(object.provider(), object.key());
     }
 
     public boolean fail(UUID org, UUID document, UUID revision) {
@@ -79,6 +87,8 @@ public class DocumentUploadRecovery {
             return changed == 1;
         }));
     }
+
+    private record StorageObject(String provider, UUID key) {}
 
     @PreDestroy
     public void close() throws SQLException {

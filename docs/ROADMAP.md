@@ -1,6 +1,6 @@
 # Traceback — Development Roadmap
 
-**Last source review:** Local `main`, 2026-10-13, M9A/M9B approved for local development; local Keycloak follow-up verified; M10 implemented locally and pending review.
+**Last source review:** Local `codex/m11-durable-ingestion`, 2026-10-14; M9A/M9B/M10 approved for local development; local Keycloak follow-up verified; M11 implemented locally, review pending.
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
@@ -48,21 +48,36 @@
 
 **Acceptance:** A user from organization A cannot see, update, delete, enumerate, or search organization B's incidents. Unauthorized access fails without leaking data. Only after this gate may the API be considered for public exposure.
 
-**Implemented locally:** Append-only V4 preserves legacy incidents with NULL ownership, enforces ownership for new writes, and adds the foreign key/indexes. Scoped CRUD/list/filter/count queries and SQL write predicates enforce persisted membership and ADMIN/ENGINEER/VIEWER permissions; global routes are denied. PATCH and DELETE retain atomic version conflict checks. Regression, role/tenant, legacy, migration, direct service/repository, rollback, and concurrent-write tests are present. See [M9B_INCIDENT_TENANCY.md](M9B_INCIDENT_TENANCY.md) for the contract and actual verification results: `clean test` and `verify` each passed all 45 tests on Java 21 with no failures/errors/skips. The user approved M9B for local development. The separate [local Keycloak smoke test](LOCAL_KEYCLOAK_SMOKE.md) now verifies signed human/CLI tokens and real wrong-audience rejection using a disposable backend/database. Milestone 10 is now implemented locally and pending review; see its record below.
+**Implemented locally:** Append-only V4 preserves legacy incidents with NULL ownership, enforces ownership for new writes, and adds the foreign key/indexes. Scoped CRUD/list/filter/count queries and SQL write predicates enforce persisted membership and ADMIN/ENGINEER/VIEWER permissions; global routes are denied. PATCH and DELETE retain atomic version conflict checks. Regression, role/tenant, legacy, migration, direct service/repository, rollback, and concurrent-write tests are present. See [M9B_INCIDENT_TENANCY.md](M9B_INCIDENT_TENANCY.md) for the contract and actual verification results: `clean test` and `verify` each passed all 45 tests on Java 21 with no failures/errors/skips. The user approved M9B for local development. The separate [local Keycloak smoke test](LOCAL_KEYCLOAK_SMOKE.md) now verifies signed human/CLI tokens and real wrong-audience rejection using a disposable backend/database. Milestone 10 is approved for local development; see its record below.
 
-## M10 — Knowledge base and document management — IMPLEMENTED LOCALLY; REVIEW PENDING
+## M10 — Knowledge base and document management — APPROVED for local development
 
 **Deliver:** Organization-owned document records, versions, upload status, source metadata, size/type limits, lifecycle API, and safe deletion behavior. Begin with PDF (text-based), Markdown, and TXT.
 
 **Acceptance:** Only authorized users can list/download/manage their documents; file validation and version-history tests pass. No AI required yet.
 
-**Implemented locally:** Organization-scoped PDF/Markdown/TXT uploads; validated bounded content, measured size and SHA-256; immutable revision attempt history; pagination/status filtering; version-aware title/revision/deletion operations; private POSIX storage behind a small adapter; crash/failure compensation and startup cleanup; current membership/RBAC checks in services and scoped SQL; composite tenant foreign keys; tombstone deletion blocking all historical downloads. Append-only V5 preserves V1–V4 and existing data. No extraction, ingestion, AI, cloud or frontend was added. Storage/runtime is deliberately single-process. See [M10_DOCUMENT_MANAGEMENT.md](M10_DOCUMENT_MANAGEMENT.md) for API examples, final verification evidence, recovery/deletion policy and limits. Final `clean test` and `verify` each passed 79 tests with zero failures/errors/skips; the M10 record includes build verification. User acceptance remains pending; M11 has not begun.
+**Implemented locally:** Organization-scoped PDF/Markdown/TXT uploads; validated bounded content, measured size and SHA-256; immutable revision attempt history; pagination/status filtering; version-aware title/revision/deletion operations; private POSIX storage behind a small adapter; crash/failure compensation and startup cleanup; current membership/RBAC checks in services and scoped SQL; composite tenant foreign keys; tombstone deletion blocking all historical downloads. Append-only V5 preserves V1–V4 and existing data. No extraction, ingestion, AI, cloud or frontend was added. Storage/runtime is deliberately single-process. See [M10_DOCUMENT_MANAGEMENT.md](M10_DOCUMENT_MANAGEMENT.md) for API examples, final verification evidence, recovery/deletion policy and limits. Final `clean test` and `verify` each passed 79 tests with zero failures/errors/skips; the M10 record includes build verification. The user approved M10 for local development; M11 is implemented below.
 
-## M11 — Durable ingestion with AWS S3/SQS — PLANNED
+## M11 — Durable ingestion with AWS S3/SQS — IMPLEMENTED LOCALLY; REVIEW PENDING
 
-**Deliver:** Private S3 upload, presigned URLs, upload verification, PostgreSQL outbox, SQS publisher, Java worker, parser/chunker, retries, idempotency, dead-letter handling, and controlled cleanup.
+**Deliver:** Explicit private LOCAL/S3 storage providers; PostgreSQL transactional outbox and
+preparation jobs; leased SQS dispatcher; independently executable Java verification worker;
+idempotency, bounded processing retries, dead-letter handling, recovery and operational status.
+LocalStack only; no real AWS provisioning. Preserve existing M10 upload/download/revision/tombstone
+behavior. This milestone excludes extraction, parser/chunker, embeddings, RAG and presigned uploads.
 
-**Acceptance:** A real or integration-test worker crash and duplicate SQS delivery cannot create duplicate active chunks or mark a failed document ready; jobs recover or fail visibly. No cloud provisioning without explicit approval.
+**Implemented:** Append-only V6 preserves old revisions as LOCAL and adds tenant-constrained jobs/events.
+Conditional SHA-256 S3 writes, token/generation-fenced job completion, concurrent dispatch/claim safety,
+missing-delivery reconciliation, explicit development retry, scoped status reads, worker health and
+Micrometer measurements. Local Compose/init scripts and sanitized configuration are provided. The API
+retains single-writer recovery; independently executable workers use read-only legacy filesystem access.
+
+**Acceptance evidence:** `clean test` and `verify` each passed 106 tests with zero failures/errors/skips, including existing
+45 incident/organization tests and all M10 regressions, private S3 metadata/roundtrip checks, SQL rollback,
+lease/crash simulations, duplicate/out-of-order messages, live SQS visibility/DLQ redrive, cancelled/deleted
+work, tenant UUID forgery and a separate scheduled Java worker. See [M11_DURABLE_INGESTION.md](M11_DURABLE_INGESTION.md)
+for exact final commands, build evidence and emulator limitations. VERIFIED is preparation only; no index
+or search exists. User review is pending. Do not start M12 before acceptance.
 
 ## M12 — Retrieval and RAG foundations — PLANNED
 

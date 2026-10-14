@@ -36,7 +36,7 @@ class DocumentMigrationIntegrationTest {
                 insert.setObject(1,owned); insert.setObject(2,org); insert.executeUpdate();
             }
             var before = snapshot(c);
-            var latest = version(null); assertEquals(1,latest.migrate().migrationsExecuted);
+            var latest = version("5"); assertEquals(1,latest.migrate().migrationsExecuted);
             assertTrue(latest.validateWithResult().validationSuccessful);
             assertEquals(before,snapshot(c)); assertEquals(0,latest.migrate().migrationsExecuted);
             try (var s = c.createStatement();var row = s.executeQuery("SELECT count(*) FROM documents")) { row.next(); assertEquals(0,row.getLong(1)); }

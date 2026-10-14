@@ -14,7 +14,12 @@ import java.util.UUID;
 @Repository
 public class DocumentRepository {
     private final NamedParameterJdbcTemplate jdbc;
-    public DocumentRepository(NamedParameterJdbcTemplate jdbc) { this.jdbc = jdbc; }
+    private final dev.traceback.ingestion.IngestionRepository ingestion;
+    private final String provider;
+    public DocumentRepository(NamedParameterJdbcTemplate jdbc, dev.traceback.ingestion.IngestionRepository ingestion,
+                              @org.springframework.beans.factory.annotation.Value("${traceback.documents.provider:LOCAL}") String provider) {
+        this.jdbc = jdbc; this.ingestion = ingestion; this.provider = provider;
+    }
 
     private static final String READ = """
             d.organization_id = :org AND EXISTS (SELECT 1 FROM organization_memberships m
@@ -75,14 +80,14 @@ public class DocumentRepository {
                                DocumentUploadValidator.ValidatedUpload upload, Identity identity) {
         int changed = jdbc.update("""
                 INSERT INTO document_revisions (id, organization_id, document_id, revision_number,
-                  original_filename, media_type, file_size, checksum, storage_key, uploaded_by, status)
+                  original_filename, media_type, file_size, checksum, storage_key, storage_provider, uploaded_by, status)
                 SELECT :revision, :org, d.id,
                   COALESCE((SELECT max(r.revision_number) FROM document_revisions r WHERE r.document_id = d.id AND r.organization_id = :org), 0) + 1,
-                  :filename, :media, :size, :checksum, :key, u.id, 'UPLOADING'
+                  :filename, :media, :size, :checksum, :key, :provider, u.id, 'UPLOADING'
                 FROM documents d JOIN app_users u ON u.issuer = :issuer AND u.subject = :subject
                 WHERE d.id = :document AND d.organization_id = :org AND d.status <> 'DELETED' AND
                 """ + WRITE, scope(org, identity).addValue("document", document).addValue("revision", revision).addValue("key", key)
-                .addValue("filename", upload.filename()).addValue("media", upload.mediaType())
+                .addValue("provider", provider).addValue("filename", upload.filename()).addValue("media", upload.mediaType())
                 .addValue("size", upload.bytes().length).addValue("checksum", upload.checksum()));
         requireWrite(changed);
         touch(org, document, identity, null, null, false);
@@ -100,12 +105,18 @@ public class DocumentRepository {
         requireWrite(jdbc.update("UPDATE documents SET status = 'AVAILABLE', current_revision_id = :revision,"
                         + " version = version + 1, modified_at = clock_timestamp() WHERE organization_id = :org AND id = :document AND status <> 'DELETED' AND " + WRITE,
                 scope(org, identity).addValue("document", document).addValue("revision", revision)));
+        ingestion.enqueue(org, document, revision);
     }
     public void touch(UUID org, UUID id, Identity identity, String title, Long version, boolean delete) {
         requireWrite(jdbc.update("UPDATE documents SET version = version + 1, modified_at = clock_timestamp()"
                         + (title != null ? ", title = :title" : "") + (delete ? ", status = 'DELETED'" : "")
                         + " WHERE organization_id = :org AND id = :id" + (version != null ? " AND version = :version" : "") + " AND " + WRITE,
                 scope(org, identity).addValue("id", id).addValue("title", title).addValue("version", version)));
+        if (delete) ingestion.cancel(org, id, null);
+    }
+    dev.traceback.ingestion.IngestionRepository.Status ingestionStatus(UUID org, UUID document, UUID revision) {
+        var job = ingestion.find(org, document, revision, false);
+        return job == null ? new dev.traceback.ingestion.IngestionRepository.Status("NOT_SCHEDULED", 0, null, null, null) : job.response();
     }
     private void requireWrite(int changed) {
         if (changed != 1) throw new dev.traceback.organization.OrganizationPermissionDeniedException();
@@ -119,7 +130,7 @@ public class DocumentRepository {
         return new RevisionRow(r.getObject("id", UUID.class), r.getObject("organization_id", UUID.class),
                 r.getObject("document_id", UUID.class), r.getInt("revision_number"), r.getString("original_filename"),
                 r.getString("media_type"), r.getLong("file_size"), r.getString("checksum"), r.getObject("uploaded_by", UUID.class),
-                r.getString("status"), r.getTimestamp("created_at").toInstant(), r.getObject("storage_key", UUID.class));
+                r.getString("status"), r.getTimestamp("created_at").toInstant(), r.getObject("storage_key", UUID.class), r.getString("storage_provider"));
     }
     public record DocumentRow(UUID id, UUID organizationId, String title, UUID createdBy, DocumentStatus status,
                               long version, UUID currentRevisionId, java.time.Instant createdAt, java.time.Instant modifiedAt) {
@@ -129,7 +140,7 @@ public class DocumentRepository {
     }
     public record RevisionRow(UUID id, UUID organizationId, UUID documentId, int revisionNumber,
                               String originalFilename, String mediaType, long fileSize, String checksum,
-                              UUID uploadedBy, String status, java.time.Instant createdAt, UUID storageKey) {
+                              UUID uploadedBy, String status, java.time.Instant createdAt, UUID storageKey, String storageProvider) {
         public RevisionResponse metadata() {
             return new RevisionResponse(id, organizationId, documentId, revisionNumber, originalFilename,
                     mediaType, fileSize, checksum, uploadedBy, status, createdAt);

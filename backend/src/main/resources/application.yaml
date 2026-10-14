@@ -35,3 +35,35 @@ traceback:
     # Private POSIX directory outside the checkout; never mount as static content.
     storage-directory: ${DOCUMENT_STORAGE_DIRECTORY:${user.home}/.local/share/traceback/documents}
     max-file-size-bytes: ${DOCUMENT_MAX_FILE_SIZE_BYTES:10485760}
+    provider: ${DOCUMENT_STORAGE_PROVIDER:LOCAL}
+  runtime: ${TRACEBACK_RUNTIME:api}
+  aws:
+    enabled: ${LOCAL_AWS_ENABLED:false}
+    endpoint: ${LOCAL_AWS_ENDPOINT:http://localhost:4566}
+    bucket: ${LOCAL_S3_BUCKET:traceback-documents-local}
+    queue-name: ${LOCAL_SQS_QUEUE:traceback-ingestion-local}
+  ingestion:
+    scheduling-enabled: true
+    lease-seconds: 120
+    visibility-seconds: 150
+    max-attempts: 5
+    base-backoff-seconds: 2
+    max-backoff-seconds: 60
+    recovery-seconds: 180
+
+server:
+  address: 127.0.0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  health:
+    diskspace:
+      enabled: false

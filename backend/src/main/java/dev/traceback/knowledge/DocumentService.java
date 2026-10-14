@@ -90,7 +90,7 @@ public class DocumentService {
             try {
                 // If commit succeeded but acknowledgement failed, preserve AVAILABLE content.
                 // If DB is unavailable, retain private objects and the pending record for recovery.
-                if (recovery.fail(org, document, attempt.metadata().id())) storage.delete(attempt.storageKey());
+                if (recovery.fail(org, document, attempt.metadata().id())) storage.delete(attempt.storageProvider(), attempt.storageKey());
             } catch (IOException | RuntimeException cleanupFailure) {
                 // No paths/content/credentials in the HTTP error. Recovery retries on restart.
                 LoggerFactory.getLogger(DocumentService.class).warn("Document upload cleanup requires startup recovery");
@@ -143,12 +143,21 @@ public class DocumentService {
             var content = repository.revision(org, document, selected, identity);
             if (!"AVAILABLE".equals(content.metadata().status())) throw DocumentException.missing();
             try {
-                byte[] bytes = storage.read(content.storageKey(), validator.maximumBytes());
+                byte[] bytes = storage.read(content.storageProvider(), content.storageKey(), validator.maximumBytes());
                 if (bytes.length != content.metadata().fileSize() || !DocumentUploadValidator.checksum(bytes).equals(content.metadata().checksum())) {
                     throw DocumentException.storage();
                 }
                 return new Download(content.metadata(), bytes);
             } catch (IOException ex) { throw DocumentException.storage(); }
+        });
+    }
+
+    public dev.traceback.ingestion.IngestionRepository.Status ingestionStatus(Jwt jwt, UUID org, UUID document, UUID revision) {
+        return read.execute(tx -> {
+            Identity identity = access(jwt, org, false);
+            active(repository.find(org, document, identity, false));
+            repository.revision(org, document, revision, identity);
+            return repository.ingestionStatus(org, document, revision);
         });
     }
 

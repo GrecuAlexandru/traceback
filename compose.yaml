@@ -27,6 +27,23 @@ services:
     volumes:
       - keycloak_data:/opt/keycloak/data
 
+  localstack:
+    image: localstack/localstack:4.8.1
+    environment:
+      SERVICES: s3,sqs
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      SQS_ENDPOINT_STRATEGY: path
+    ports:
+      - "127.0.0.1:4566:4566"
+    volumes:
+      - ./scripts/localstack/10-init.sh:/etc/localstack/init/ready.d/10-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal sqs get-queue-url --queue-name traceback-ingestion-local >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
   postgres_data:

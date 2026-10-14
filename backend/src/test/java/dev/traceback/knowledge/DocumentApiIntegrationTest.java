@@ -71,6 +71,8 @@ class DocumentApiIntegrationTest {
         reset(storage);
         // Disposable database only. Break the current-revision FK before deleting fixtures.
         jdbc.update("UPDATE documents SET current_revision_id = NULL, status = 'DELETED'");
+        jdbc.update("DELETE FROM ingestion_outbox");
+        jdbc.update("DELETE FROM ingestion_jobs");
         jdbc.update("DELETE FROM document_revisions");
         jdbc.update("DELETE FROM documents");
         jdbc.update("DELETE FROM incidents");
@@ -179,7 +181,7 @@ class DocumentApiIntegrationTest {
         var foreign = service.upload(token("bob"), orgB, "Private", text("private"));
         var own = upload();
         UUID id = foreign.id(), revision = foreign.currentRevision().id();
-        for (String route : List.of(item(id), item(id) + "/content", item(id) + "/revisions", item(id) + "/revisions/" + revision + "/content",
+        for (String route : List.of(item(id), item(id) + "/content", item(id) + "/revisions", item(id) + "/revisions/" + revision + "/content", item(id) + "/revisions/" + revision + "/ingestion",
                 item(own.id()) + "/revisions/" + revision + "/content")) {
             mvc.perform(get(route).with(human("alice"))).andExpect(status().isNotFound());
         }
@@ -397,6 +399,17 @@ class DocumentApiIntegrationTest {
         }
         assertEquals(1, files());
         assertEquals(doc.currentRevision(), service.metadata(token("alice"), orgA, doc.id()).currentRevision());
+    }
+
+    @Test void ingestionStatusUsesSameTenantAndMembershipBoundaryAsDownloads() throws Exception {
+        var doc=upload();String path=item(doc.id())+"/revisions/"+doc.currentRevision().id()+"/ingestion";
+        mvc.perform(get(path).with(human("viewer"))).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("PENDING"));
+        mvc.perform(get(path)).andExpect(status().isUnauthorized());
+        mvc.perform(get(path).with(human("bob"))).andExpect(status().isForbidden());
+        jdbc.update("DELETE FROM organization_memberships WHERE user_id=(SELECT id FROM app_users WHERE subject='viewer')");
+        mvc.perform(get(path).with(human("viewer"))).andExpect(status().isForbidden());
+        service.delete(token("alice"),orgA,doc.id(),doc.version());
+        mvc.perform(get(path).with(human("alice"))).andExpect(status().isNotFound());
     }
 
     @Test void corruptOrMissingStorageNeverReturnsUnverifiedContent() throws Exception {

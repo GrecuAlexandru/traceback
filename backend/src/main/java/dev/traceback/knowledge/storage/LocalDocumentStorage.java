@@ -1,8 +1,6 @@
 package dev.traceback.knowledge.storage;
 
 import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,13 +13,16 @@ import java.util.UUID;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardOpenOption.*;
 
-@Component
 public class LocalDocumentStorage implements DocumentStorage, AutoCloseable {
     private final Path root;
+    private final boolean readOnly;
     private final FileChannel lockChannel;
     private final FileLock lock;
 
-    public LocalDocumentStorage(@Value("${traceback.documents.storage-directory}") String directory) throws IOException {
+    public LocalDocumentStorage(String directory) throws IOException { this(directory, false); }
+
+    public LocalDocumentStorage(String directory, boolean readOnly) throws IOException {
+        this.readOnly = readOnly;
         Path configured = Path.of(directory);
         if (!configured.isAbsolute()) throw new IOException("Document storage must be an absolute private directory");
         root = configured.normalize();
@@ -39,6 +40,16 @@ public class LocalDocumentStorage implements DocumentStorage, AutoCloseable {
         }
         for (Path ancestor = root; ancestor != null; ancestor = ancestor.getParent()) {
             if (Files.exists(ancestor.resolve("AGENTS.md"))) throw new IOException("Document storage must be outside repository trees");
+        }
+        if (readOnly) {
+            Path marker = root.resolve(".traceback-storage");
+            if (!Files.isDirectory(root, NOFOLLOW_LINKS) || !Files.isRegularFile(marker, NOFOLLOW_LINKS)
+                    || Files.size(marker) > 100 || !Files.readString(marker).equals("traceback-private-documents-v1\n")) {
+                throw new IOException("Worker requires an initialized private storage directory");
+            }
+            lockChannel = null;
+            lock = null;
+            return;
         }
         Files.createDirectories(root, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
         if (!Files.isDirectory(root, NOFOLLOW_LINKS)) throw new IOException("Invalid storage directory");
@@ -69,6 +80,7 @@ public class LocalDocumentStorage implements DocumentStorage, AutoCloseable {
 
     @Override
     public void put(UUID key, byte[] content) throws IOException {
+        if (readOnly) throw new IOException("Worker storage is read-only");
         Path staged = staging(key);
         if (Files.exists(object(key), NOFOLLOW_LINKS)) throw new IOException("Object already exists");
         try (FileChannel channel = FileChannel.open(staged, java.util.Set.of(CREATE_NEW, WRITE, NOFOLLOW_LINKS),
@@ -84,20 +96,22 @@ public class LocalDocumentStorage implements DocumentStorage, AutoCloseable {
 
     @Override
     public byte[] read(UUID key, long maximumBytes) throws IOException {
-        if (!Files.isRegularFile(object(key), NOFOLLOW_LINKS)) throw new IOException("Invalid storage object");
+        if (!Files.exists(object(key), NOFOLLOW_LINKS)) throw new StorageFailure("CONTENT_MISSING");
+        if (!Files.isRegularFile(object(key), NOFOLLOW_LINKS)) throw new StorageFailure("CONTENT_CORRUPT");
         try (var input = Files.newInputStream(object(key), READ, NOFOLLOW_LINKS)) {
             byte[] bytes = input.readNBytes(Math.toIntExact(maximumBytes + 1));
-            if (bytes.length > maximumBytes) throw new IOException("Storage object exceeds limit");
+            if (bytes.length > maximumBytes) throw new StorageFailure("CONTENT_LIMIT");
             return bytes;
         }
     }
 
     @Override
     public void delete(UUID key) throws IOException {
+        if (readOnly) throw new IOException("Worker storage is read-only");
         Files.deleteIfExists(staging(key));
         Files.deleteIfExists(object(key));
     }
 
     @PreDestroy
-    public void close() throws IOException { lock.release(); lockChannel.close(); }
+    public void close() throws IOException { if (lock != null) lock.release(); if (lockChannel != null) lockChannel.close(); }
 }

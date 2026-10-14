@@ -56,6 +56,11 @@ public class DocumentController {
     @GetMapping("/{id}/revisions/{revisionId}/content")
     public ResponseEntity<byte[]> revisionContent(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID organizationId,
             @PathVariable UUID id, @PathVariable UUID revisionId) { return content(service.download(jwt, organizationId, id, revisionId)); }
+    @GetMapping("/{id}/revisions/{revisionId}/ingestion")
+    public dev.traceback.ingestion.IngestionRepository.Status ingestion(@AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID organizationId, @PathVariable UUID id, @PathVariable UUID revisionId) {
+        return service.ingestionStatus(jwt, organizationId, id, revisionId);
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID organizationId,
             @PathVariable UUID id, @RequestParam long version) {
