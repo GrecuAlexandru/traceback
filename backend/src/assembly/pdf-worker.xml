@@ -1,0 +1,9 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0">
+  <id>pdf-worker</id><formats><format>jar</format></formats><includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets><dependencySet><unpack>true</unpack><useProjectArtifact>false</useProjectArtifact>
+    <includes><include>org.apache.pdfbox:*</include><include>commons-logging:commons-logging</include></includes>
+  </dependencySet></dependencySets>
+  <fileSets><fileSet><directory>${project.build.outputDirectory}</directory><outputDirectory>/</outputDirectory>
+    <includes><include>dev/traceback/extraction/PdfProcess*.class</include><include>dev/traceback/extraction/TextExtraction.class</include><include>dev/traceback/extraction/SourceBlock.class</include><include>dev/traceback/extraction/ExtractionFailure.class</include></includes>
+  </fileSet></fileSets>
+</assembly>

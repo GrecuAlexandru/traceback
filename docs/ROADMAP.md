@@ -1,6 +1,6 @@
 # Traceback — Development Roadmap
 
-**Last source review:** Local `codex/m11-durable-ingestion`, 2026-10-14; M9A/M9B/M10 approved for local development; local Keycloak follow-up verified; M11 implemented locally, review pending.
+**Last source review:** Local `codex/m12-extraction-retrieval`, 2026-10-14; M9A–M11 approved for local development; M12 implemented locally, milestone review pending.
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
@@ -58,7 +58,7 @@
 
 **Implemented locally:** Organization-scoped PDF/Markdown/TXT uploads; validated bounded content, measured size and SHA-256; immutable revision attempt history; pagination/status filtering; version-aware title/revision/deletion operations; private POSIX storage behind a small adapter; crash/failure compensation and startup cleanup; current membership/RBAC checks in services and scoped SQL; composite tenant foreign keys; tombstone deletion blocking all historical downloads. Append-only V5 preserves V1–V4 and existing data. No extraction, ingestion, AI, cloud or frontend was added. Storage/runtime is deliberately single-process. See [M10_DOCUMENT_MANAGEMENT.md](M10_DOCUMENT_MANAGEMENT.md) for API examples, final verification evidence, recovery/deletion policy and limits. Final `clean test` and `verify` each passed 79 tests with zero failures/errors/skips; the M10 record includes build verification. The user approved M10 for local development; M11 is implemented below.
 
-## M11 — Durable ingestion with AWS S3/SQS — IMPLEMENTED LOCALLY; REVIEW PENDING
+## M11 — Durable ingestion with AWS S3/SQS — APPROVED for local development
 
 **Deliver:** Explicit private LOCAL/S3 storage providers; PostgreSQL transactional outbox and
 preparation jobs; leased SQS dispatcher; independently executable Java verification worker;
@@ -77,13 +77,18 @@ retains single-writer recovery; independently executable workers use read-only l
 lease/crash simulations, duplicate/out-of-order messages, live SQS visibility/DLQ redrive, cancelled/deleted
 work, tenant UUID forgery and a separate scheduled Java worker. See [M11_DURABLE_INGESTION.md](M11_DURABLE_INGESTION.md)
 for exact final commands, build evidence and emulator limitations. VERIFIED is preparation only; no index
-or search exists. User review is pending. Do not start M12 before acceptance.
+or search existed at the M11 checkpoint. The user approved M11 and authorized M12 on 2026-10-14.
 
-## M12 — Retrieval and RAG foundations — PLANNED
+## M12 — Extraction, indexing and hybrid retrieval — IMPLEMENTED LOCALLY; REVIEW PENDING
 
 **Deliver:** Embedding-provider adapter, pgvector schema, full-text search, permission-aware hybrid retrieval, chunk/source references, and an initial evaluation dataset.
 
 **Acceptance:** Search results are tenant-authorized; a fixed set of questions measures recall@k and relevance; results are reproducible and saved under `evaluations/`.
+
+**Implemented locally:** Resource-constrained isolated PDFBox validation/extraction, UTF-8 Markdown/TXT, deterministic source-aware chunks, real local nomic v1.5 embeddings through Spring AI 2.0.1/Ollama, append-only V7 pgvector/full-text schema, typed M11 outbox/SQS indexing events, renewable fenced leases, extraction checkpoints, retries/recovery, atomic generation publication, safe reindex/backfill commands and organization-scoped keyword/cosine/RRF APIs. Current-revision/tombstone/membership filtering occurs inside SQL before top-K. Defaults require explicit model/indexing enablement; no private data leaves local configured inference.
+
+**Evidence:** Final `clean test` and `verify` each passed 152 tests with no failures/errors/skips; complete build evidence is recorded in [M12](M12_EXTRACTION_AND_RETRIEVAL.md). The separate real-model evaluation uses five synthetic documents/ten chunks and ten labeled exact/paraphrase queries per tenant: Recall@5/MRR@5 0.60/0.60 keyword, 1.00/1.00 semantic and hybrid, zero foreign results. Dataset and actual observations are saved under `evaluations/m12/`; these do not establish production quality. ADR-0007 and local downloads were approved before implementation. M12 milestone acceptance remains pending; do not start M13.
+
 
 ## M13 — Grounded AI chat and tools — PLANNED
 

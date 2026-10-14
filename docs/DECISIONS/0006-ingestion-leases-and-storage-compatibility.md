@@ -1,6 +1,6 @@
 # ADR-0006 — Ingestion leases and explicit storage compatibility
 
-- **Status:** Accepted for M11 implementation; milestone review pending
+- **Status:** Accepted for M11 implementation; M11 approved for local development 2026-10-14
 - **Date:** 2026-10-14
 - **Extends:** ADR-0001, ADR-0003, ADR-0004
 
@@ -61,3 +61,6 @@ V6, routing/S3 adapters, transactional jobs/outbox, leased dispatch/worker verif
 retry/reconciliation/DLQ and status/health/metrics are implemented. Disposable PostgreSQL/
 LocalStack integration tests and a separate scheduled worker process exercise the design.
 See [M11](../M11_DURABLE_INGESTION.md) for exact final verification and commands.
+
+
+**CURRENT M12 extension:** ADR-0007 was explicitly approved on 2026-10-14. Verification retains its original lease/meaning; separate indexing uses 90-second renewable token ownership, 30-second DB/SQS heartbeat and ten-minute per-claim deadline. Original revision/provider immutability, read-only legacy worker access and one API writer remain unchanged. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).

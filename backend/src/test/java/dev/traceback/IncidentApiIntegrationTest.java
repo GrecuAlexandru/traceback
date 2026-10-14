@@ -29,6 +29,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.DriverManager;
 import java.util.UUID;
@@ -53,7 +54,7 @@ class IncidentApiIntegrationTest {
     private static final UUID LEGACY_ID = UUID.fromString("00000000-0000-0000-0000-000000000009");
 
     @Container
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg17").asCompatibleSubstituteFor("postgres"));
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) throws Exception {

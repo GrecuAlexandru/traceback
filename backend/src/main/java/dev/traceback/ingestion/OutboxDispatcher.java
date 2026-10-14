@@ -18,7 +18,7 @@ public class OutboxDispatcher {
         var event=repository.claimEvent();
         if (event==null) return false;
         try {
-            queue.send(event.message().encode());
+            queue.send(event.body());
         } catch (RuntimeException ex) {
             repository.publishFailed(event,settings.backoff(event.attempts()));
             metrics.counter("traceback.outbox.publish.failures").increment();

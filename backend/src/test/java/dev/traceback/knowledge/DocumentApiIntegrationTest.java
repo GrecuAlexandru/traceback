@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DocumentApiIntegrationTest {
     static final String ISSUER = "http://localhost:8180/realms/traceback";
     static final String ROOT = TestDocumentStorage.directory();
-    @Container static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17-alpine");
+    @Container static PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg17").asCompatibleSubstituteFor("postgres"));
     @DynamicPropertySource static void properties(DynamicPropertyRegistry r) {
         r.add("spring.datasource.url", postgres::getJdbcUrl);
         r.add("spring.datasource.username", postgres::getUsername);

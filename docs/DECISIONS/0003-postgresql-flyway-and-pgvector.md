@@ -35,3 +35,6 @@ M9B appends V4 without editing prior migrations. NULL legacy ownership remains q
 **CURRENT M10:** Append-only V5 creates tenant-owned documents and immutable content revision attempts with composite foreign keys, checks, unique/index constraints and a revision-update trigger. Explicit JDBC mapping and row locks serve the two-phase upload workflow; metadata version and content revision number are distinct. V4→V5 tests preserve incidents/users/organizations/memberships. Existing JPA validation remains enabled; V1–V4 are unchanged.
 
 **CURRENT M11:** Append-only V6 adds immutable storage provider (old revisions LOCAL), preparation jobs and outbox records with composite tenant FKs, uniqueness, state/lease constraints and due/recovery indexes. Token leases and document-first row locks enforce concurrency; explicit JDBC transaction boundaries fence completion. V1–V5 are unchanged; a V5→V6 preservation/constraint test is included. No vector schema is added.
+
+
+**CURRENT M12:** Append-only V7 adds pgvector and composite-owned derived artifacts/generations, immutable configuration/dimension metadata, simple full-text GIN indexes and a complete-publication head trigger. Exact cosine avoids premature approximate-index optimization. V1–V6 are unchanged; upgrade tests preserve existing revisions/jobs/events. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).

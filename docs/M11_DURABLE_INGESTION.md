@@ -1,5 +1,7 @@
 # M11 — Durable asynchronous document ingestion
 
+**Follow-up status (2026-10-14):** M11 is approved for local development. M12 now extends its typed outbox/worker lifecycle; the historical M11 evidence below remains unchanged. See [M12](M12_EXTRACTION_AND_RETRIEVAL.md).
+
 ## Implementation plan (2026-10-14)
 
 Preserve the M10 synchronous, bounded validation/upload API and its single API writer

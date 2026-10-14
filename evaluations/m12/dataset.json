@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "key": "database",
+      "title": "Database outage runbook",
+      "text": "# Connection diagnosis\n\nPostgreSQL connection timeout means the application cannot open a database socket. Check the database listener, network route, DNS resolution and exhausted connection pool. Compare active sessions with the configured maximum connections. A refused connection differs from a slow query.\n\n# Database recovery\n\nDrain excess idle sessions and repair the unreachable database endpoint. Restart only the unhealthy connection pool after confirming server availability. Run a read-only SELECT 1 health check and watch connection acquisition latency before restoring traffic."
+    },
+    {
+      "key": "api",
+      "title": "API upstream troubleshooting",
+      "text": "# Upstream failure\n\nHTTP 503 Service Unavailable occurs when the gateway has no healthy upstream application instances. Inspect readiness probes and the upstream endpoint list. Requests can fail while new instances are starting even though the gateway itself is running. Check circuit breaker state and recent application restarts.\n\n# Traffic recovery\n\nRestore at least one ready application instance before retrying traffic. Use bounded exponential backoff for safe idempotent requests. Avoid retry storms and do not repeat writes without an idempotency key. Verify successful requests and stable upstream latency."
+    },
+    {
+      "key": "authentication",
+      "title": "Authentication failure guide",
+      "text": "# Expired session\n\nAUTH_TOKEN_EXPIRED indicates that the signed access token passed its expiration time. A login session can stop working after it ages out. Refresh through the existing authorized session or sign in again. Do not extend token expiry in the API or log the bearer token.\n\n# Invalid signature\n\nSignature validation failures require checking the trusted issuer and current signing key set. Validate the intended audience and server clock. Reject unsigned tokens and tokens issued for another API. An organization role supplied by the browser never establishes membership."
+    },
+    {
+      "key": "deployment",
+      "title": "Deployment rollback instructions",
+      "text": "# Rollback\n\nTo rollback deployment, restore the last known good application release. Pause the rollout and record the affected version. Redeploy the previously tested immutable image and keep database migrations forward compatible. Never reset the database to undo a release.\n\n# Release verification\n\nVerify readiness probes, error rate and business transactions after the previous version is restored. Compare traffic with the baseline before resuming deployments. If the old binary cannot read the current schema, stop and follow the migration compatibility procedure."
+    },
+    {
+      "key": "postmortem",
+      "title": "JVM memory incident postmortem",
+      "text": "# Root cause\n\nOutOfMemoryError terminated the JVM because a response cache retained too many large response objects. Heap usage grew after each request and garbage collection could not reclaim the reachable objects. The unbounded cache caused the process to die during peak traffic.\n\n# Follow-up actions\n\nReplace the cache with bounded eviction and cap individual response size. Alert on sustained heap growth and garbage collection pressure. Load test repeated large responses and verify stable retained heap. Restarting alone does not fix the retention defect."
+    }
+  ],
+  "queries": [
+    {
+      "q": "PostgreSQL connection timeout",
+      "kind": "exact",
+      "relevant": [
+        {
+          "document": "database",
+          "section": "Connection diagnosis"
+        }
+      ]
+    },
+    {
+      "q": "HTTP 503",
+      "kind": "exact",
+      "relevant": [
+        {
+          "document": "api",
+          "section": "Upstream failure"
+        }
+      ]
+    },
+    {
+      "q": "AUTH_TOKEN_EXPIRED",
+      "kind": "exact",
+      "relevant": [
+        {
+          "document": "authentication",
+          "section": "Expired session"
+        }
+      ]
+    },
+    {
+      "q": "rollback deployment",
+      "kind": "exact",
+      "relevant": [
+        {
+          "document": "deployment",
+          "section": "Rollback"
+        }
+      ]
+    },
+    {
+      "q": "OutOfMemoryError",
+      "kind": "exact",
+      "relevant": [
+        {
+          "document": "postmortem",
+          "section": "Root cause"
+        }
+      ]
+    },
+    {
+      "q": "the service cannot obtain a database socket",
+      "kind": "paraphrase",
+      "relevant": [
+        {
+          "document": "database",
+          "section": "Connection diagnosis"
+        }
+      ]
+    },
+    {
+      "q": "requests fail because upstream instances are not ready",
+      "kind": "paraphrase",
+      "relevant": [
+        {
+          "document": "api",
+          "section": "Upstream failure"
+        }
+      ]
+    },
+    {
+      "q": "my login stopped working after the session aged out",
+      "kind": "paraphrase",
+      "relevant": [
+        {
+          "document": "authentication",
+          "section": "Expired session"
+        }
+      ]
+    },
+    {
+      "q": "restore last known good application release",
+      "kind": "paraphrase",
+      "relevant": [
+        {
+          "document": "deployment",
+          "section": "Rollback"
+        }
+      ]
+    },
+    {
+      "q": "why did the JVM die while retaining too many response objects",
+      "kind": "paraphrase",
+      "relevant": [
+        {
+          "document": "postmortem",
+          "section": "Root cause"
+        }
+      ]
+    }
+  ]
+}

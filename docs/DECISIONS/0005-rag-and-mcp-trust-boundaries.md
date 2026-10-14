@@ -32,3 +32,6 @@ Expose read-only MCP tools through the same application services and authorizati
 
 
 **CURRENT M10 foundation:** Document/revision tenant ownership, immutable source IDs/checksums, membership checks before content reads and deletion tombstones are implemented. Future retrieval must exclude deleted documents and authorize sources before context assembly. No retrieval, LLM or MCP code is present.
+
+
+**CURRENT M12 retrieval foundation:** Authorized full-text/cosine/RRF retrieval, compatible local query embeddings, bounded real-source references, current/tombstone filtering and a synthetic real-model evaluation are implemented. Untrusted content remains inert. RAG context assembly, generated answers and MCP remain PLANNED; no such endpoints exist. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).

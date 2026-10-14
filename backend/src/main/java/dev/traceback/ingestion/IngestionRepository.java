@@ -18,8 +18,9 @@ public class IngestionRepository {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
     private final IngestionSettings settings;
-    public IngestionRepository(JdbcTemplate jdbc, PlatformTransactionManager manager, IngestionSettings settings) {
-        this.jdbc = jdbc; this.settings = settings;
+    private final dev.traceback.indexing.IndexRepository indexing;
+    public IngestionRepository(JdbcTemplate jdbc, PlatformTransactionManager manager, IngestionSettings settings, dev.traceback.indexing.IndexRepository indexing) {
+        this.jdbc = jdbc; this.settings = settings; this.indexing = indexing;
         tx = new TransactionTemplate(manager);
         tx.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
         tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -44,6 +45,7 @@ public class IngestionRepository {
     }
     /** Caller owns deletion/publication transaction; document lock precedes job locks. */
     public void cancel(UUID org, UUID document, UUID keepRevision) {
+        indexing.cancel(org, document, keepRevision);
         jdbc.update("""
             UPDATE ingestion_jobs SET status='CANCELLED', lease_token=NULL, lease_until=NULL, updated_at=clock_timestamp()
             WHERE organization_id=? AND document_id=? AND (?::uuid IS NULL OR revision_id<>?)
@@ -64,7 +66,7 @@ public class IngestionRepository {
                 UPDATE ingestion_outbox SET lease_token=?, lease_until=clock_timestamp()+make_interval(secs=>?),
                 publish_attempts=publish_attempts+1 WHERE id=?
                 """, token, settings.leaseSeconds(), event.message().event());
-            return new Event(event.message(), event.generation(), event.attempts()+1, token);
+            return new Event(event.message(), event.generation(), event.attempts()+1, token, event.indexGeneration());
         });
     }
     public boolean delivered(Event event) {
@@ -81,13 +83,13 @@ public class IngestionRepository {
     }
     private Event event(ResultSet r, int n) throws SQLException {
         return new Event(new IngestionMessage(uuid(r,"id"),uuid(r,"job_id"),uuid(r,"organization_id"),uuid(r,"document_id"),uuid(r,"revision_id")),
-                r.getInt("generation"),r.getInt("publish_attempts"),uuid(r,"lease_token"));
+                r.getInt("generation"),r.getInt("publish_attempts"),uuid(r,"lease_token"),uuid(r,"index_generation_id"));
     }
 
     public Claim claim(IngestionMessage message) {
         return tx.execute(t -> {
             // Match EVERY reference before accessing content or mutating a job. Payload org is never authority.
-            var events = jdbc.query("SELECT * FROM ingestion_outbox WHERE id=?", this::event, message.event());
+            var events = jdbc.query("SELECT * FROM ingestion_outbox WHERE id=? AND event_type='VERIFY'", this::event, message.event());
             if (events.isEmpty() || !events.getFirst().message().equals(message)) return new Claim("INVALID", null);
             Event event = events.getFirst();
             jdbc.queryForObject("SELECT id FROM documents WHERE organization_id=? AND id=? FOR UPDATE", UUID.class,
@@ -141,6 +143,7 @@ public class IngestionRepository {
                     UPDATE ingestion_jobs SET status='VERIFIED',verified_at=clock_timestamp(),processing_ms=?,error_code=NULL,
                     lease_token=NULL,lease_until=NULL,updated_at=clock_timestamp() WHERE id=?
                     """, duration, current.id());
+                indexing.enqueue(current.organization(), current.document(), current.revision());
             } else if (permanent || current.attempts()>=settings.maxAttempts()) {
                 terminal(current, permanent ? failure : "RETRIES_EXHAUSTED");
             } else {
@@ -178,7 +181,7 @@ public class IngestionRepository {
     public int reconcile() {
         return tx.execute(t -> jdbc.update("""
             UPDATE ingestion_outbox o SET delivered_at=NULL,next_attempt_at=clock_timestamp(),error_code='DELIVERY_RECOVERY'
-            FROM ingestion_jobs j WHERE j.id=o.job_id AND j.generation=o.generation AND o.delivered_at IS NOT NULL
+            FROM ingestion_jobs j WHERE o.event_type='VERIFY' AND j.id=o.job_id AND j.generation=o.generation AND o.delivered_at IS NOT NULL
             AND o.lease_token IS NULL AND o.delivered_at<clock_timestamp()-make_interval(secs=>?) AND j.status IN ('PENDING','RETRY','RUNNING')
             AND j.next_attempt_at<clock_timestamp()-make_interval(secs=>?)
             AND j.updated_at<clock_timestamp()-make_interval(secs=>?)
@@ -190,7 +193,11 @@ public class IngestionRepository {
     public long failedJobs() { return jdbc.queryForObject("SELECT count(*) FROM ingestion_jobs WHERE status='FAILED'",Long.class); }
     public long publicationFailures() { return jdbc.queryForObject("SELECT count(*) FROM ingestion_outbox WHERE error_code='QUEUE_UNAVAILABLE'",Long.class); }
     public List<Event> events() { return jdbc.query("SELECT * FROM ingestion_outbox ORDER BY created_at,id",this::event); }
-    public record Event(IngestionMessage message,int generation,int attempts,UUID token) {}
+    public record Event(IngestionMessage message,int generation,int attempts,UUID token,UUID indexGeneration) {
+        public String body() {
+            return indexGeneration == null ? message.encode() : new dev.traceback.indexing.IndexMessage(message.event(),message.job(),message.organization(),message.document(),message.revision(),indexGeneration).encode();
+        }
+    }
     public record Claim(String outcome,Job job) {}
     public record Job(UUID id,UUID organization,UUID document,UUID revision,int generation,String status,int attempts,
                       UUID token,String provider,UUID key,long size,String checksum,String errorCode,Instant verifiedAt,Long processingMs) {

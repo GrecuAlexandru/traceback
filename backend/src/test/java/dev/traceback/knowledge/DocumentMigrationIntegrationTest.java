@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.DriverManager;
 import java.util.UUID;
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 class DocumentMigrationIntegrationTest {
-    @Container static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17-alpine");
+    @Container static PostgreSQLContainer postgres = new PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg17").asCompatibleSubstituteFor("postgres"));
     Flyway version(String target) {
         var config = Flyway.configure().dataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword()).locations("classpath:db/migration");
         if (target != null) config.target(target);

@@ -23,6 +23,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -49,7 +50,7 @@ import static org.awaitility.Awaitility.await;
 class DurableIngestionIntegrationTest {
     static final String ROOT=TestDocumentStorage.directory();
     static final String BUCKET="traceback-documents-local";
-    @Container static PostgreSQLContainer postgres=new PostgreSQLContainer("postgres:17-alpine");
+    @Container static PostgreSQLContainer postgres=new PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg17").asCompatibleSubstituteFor("postgres"));
     @Container static GenericContainer<?> aws=new GenericContainer<>("localstack/localstack:4.8.1")
             .withEnv("SERVICES","s3,sqs").withEnv("SQS_ENDPOINT_STRATEGY","path")
             .withCopyFileToContainer(MountableFile.forHostPath("../scripts/localstack/10-init.sh",0755),"/etc/localstack/init/ready.d/10-init.sh")
@@ -82,7 +83,9 @@ class DurableIngestionIntegrationTest {
         dlqUrl=sqs.getQueueUrl(b->b.queueName("traceback-ingestion-dlq-local")).queueUrl();
         drain(queueUrl);drain(dlqUrl);
         jdbc.update("UPDATE documents SET current_revision_id=NULL,status='DELETED'");
-        jdbc.update("DELETE FROM ingestion_outbox");jdbc.update("DELETE FROM ingestion_jobs");jdbc.update("DELETE FROM document_revisions");jdbc.update("DELETE FROM documents");
+        jdbc.update("DELETE FROM ingestion_outbox");
+        for(String table:List.of("document_index_heads","chunk_embeddings","document_chunks","extraction_artifacts","index_generations"))jdbc.update("DELETE FROM "+table);
+        jdbc.update("DELETE FROM ingestion_jobs");jdbc.update("DELETE FROM document_revisions");jdbc.update("DELETE FROM documents");
         jdbc.update("DELETE FROM organization_memberships");jdbc.update("DELETE FROM organizations");jdbc.update("DELETE FROM app_users");
         org=UUID.randomUUID();foreignOrg=UUID.randomUUID();user=UUID.randomUUID();
         jdbc.update("INSERT INTO organizations(id,name) VALUES (?,'A'),(?,'B')",org,foreignOrg);
@@ -381,6 +384,33 @@ class DurableIngestionIntegrationTest {
             int port=server.getWebServer().getPort();var client=HttpClient.newHttpClient();
             assertEquals(403,client.send(HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/api/v1/ping")).GET().build(),HttpResponse.BodyHandlers.ofString()).statusCode());
             assertEquals(200,client.send(HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/actuator/health/readiness")).GET().build(),HttpResponse.BodyHandlers.ofString()).statusCode());
+        }
+    }
+    @org.springframework.boot.test.context.TestConfiguration(proxyBeanMethods=false)
+    static class IndexTestConfiguration {
+        @org.springframework.context.annotation.Bean @org.springframework.context.annotation.Primary
+        dev.traceback.indexing.EmbeddingProvider testEmbeddings() {
+            return new dev.traceback.indexing.EmbeddingProvider() {
+                public List<float[]> documents(List<String> texts){return texts.stream().map(t->new float[]{1,0,0}).toList();}
+                public float[] query(String text){return new float[]{1,0,0};}
+            };
+        }
+    }
+    @Test void indexingEventUsesActualSharedSqsDispatcherConsumerAndDurableAcknowledgement() {
+        var doc=upload();
+        try(var context=new SpringApplicationBuilder(TracebackBackendApplication.class,IndexTestConfiguration.class).profiles("worker").run(
+            "--server.port=0","--spring.datasource.url="+postgres.getJdbcUrl(),"--spring.datasource.username="+postgres.getUsername(),
+            "--spring.datasource.password="+postgres.getPassword(),"--traceback.documents.storage-directory="+ROOT,
+            "--traceback.aws.endpoint=http://localhost:"+aws.getMappedPort(4566),"--traceback.ingestion.scheduling-enabled=false",
+            "--traceback.indexing.enabled=true","--traceback.embedding.dimensions=3","--traceback.embedding.digest=sha256:"+"1".repeat(64))) {
+            var dispatch=context.getBean(OutboxDispatcher.class);var consume=context.getBean(QueueConsumer.class);
+            assertTrue(dispatch.dispatchOne());consume.pollOnce();assertEquals("VERIFIED",job(doc).status());
+            UUID generation=jobs.events().stream().filter(e->e.indexGeneration()!=null).findFirst().orElseThrow().indexGeneration();
+            assertEquals("PENDING_EXTRACTION",context.getBean(dev.traceback.indexing.IndexRepository.class).find(generation,false).status());
+            assertTrue(dispatch.dispatchOne());consume.pollOnce();
+            assertEquals("INDEXED",context.getBean(dev.traceback.indexing.IndexRepository.class).find(generation,false).status());
+            assertTrue(receive(queueUrl).isEmpty());assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM document_index_heads",Integer.class));
+            assertEquals(0,jobs.pendingEvents());
         }
     }
 }

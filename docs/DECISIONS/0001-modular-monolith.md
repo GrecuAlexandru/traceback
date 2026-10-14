@@ -31,3 +31,6 @@ Use one Java/Spring Boot codebase organized by business feature. Controllers, se
 **CURRENT M10:** The `knowledge` feature package owns thin HTTP controllers, application services, explicit JDBC persistence records, DTOs, validation, upload recovery and a small private storage interface. No worker runtime or new service was introduced.
 
 **CURRENT M11:** The same executable build runs API and independent worker roles. Worker HTTP permits health only and skips API upload recovery. Preparation/queue scheduling reuses the `knowledge` storage abstraction and an `ingestion` feature package; no microservice/codebase split. See [ADR-0006](0006-ingestion-leases-and-storage-compatibility.md).
+
+
+**CURRENT M12:** New extraction/indexing/search feature packages extend the same codebase. A minimal standalone PDFBox artifact runs in constrained containers; API and existing worker remain the runtime roles. No separate service/job platform was introduced. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).

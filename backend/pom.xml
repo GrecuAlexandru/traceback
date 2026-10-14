@@ -31,6 +31,9 @@
 	</properties>
 	<dependencies>
         <dependency>
+            <groupId>org.springframework.ai</groupId><artifactId>spring-ai-ollama</artifactId><version>2.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
             <version>2.55.14</version>
@@ -45,7 +48,7 @@
             <artifactId>sqs</artifactId>
             <version>2.55.14</version>
         </dependency>
-		<!-- Structural PDF validation only; no document extraction or ingestion. -->
+		<!-- PDF parsing is confined to the isolated standalone parser artifact. -->
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
@@ -120,6 +123,21 @@
 
 	<build>
 		<plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId><artifactId>maven-assembly-plugin</artifactId><version>3.7.1</version>
+                <configuration><descriptors><descriptor>src/assembly/pdf-worker.xml</descriptor></descriptors>
+                    <archive><manifest><mainClass>dev.traceback.extraction.PdfProcess</mainClass></manifest></archive>
+                </configuration>
+                <executions><execution><id>pdf-worker</id><phase>process-test-classes</phase><goals><goal>single</goal></goals></execution></executions>
+            </plugin>
+            <plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>
+                <executions><execution><id>build-isolated-parser</id><phase>process-test-classes</phase><goals><goal>exec</goal></goals>
+                    <configuration><executable>docker</executable><arguments><argument>build</argument><argument>-t</argument><argument>traceback-pdf:m12</argument>
+                        <argument>-f</argument><argument>${project.basedir}/../scripts/extraction/Dockerfile</argument><argument>${project.build.directory}</argument>
+                    </arguments></configuration>
+                </execution></executions>
+            </plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

@@ -1,11 +1,5 @@
 package dev.traceback.knowledge;
 
-import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.io.RandomAccessReadBuffer;
-import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,14 +14,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.Locale;
-import java.util.Set;
 
 @Component
 public class DocumentUploadValidator {
     private final int maximumBytes;
-    public DocumentUploadValidator(@Value("${traceback.documents.max-file-size-bytes:10485760}") int maximumBytes) {
+    private final dev.traceback.extraction.DocumentExtractor extractor;
+    public DocumentUploadValidator(dev.traceback.extraction.DocumentExtractor extractor, @Value("${traceback.documents.max-file-size-bytes:10485760}") int maximumBytes) {
         if (maximumBytes < 1 || maximumBytes > 52428800) throw new IllegalArgumentException("Document limit must be 1..52428800 bytes");
-        this.maximumBytes = maximumBytes;
+        this.maximumBytes = maximumBytes; this.extractor = extractor;
     }
     public int maximumBytes() { return maximumBytes; }
 
@@ -76,43 +70,12 @@ public class DocumentUploadValidator {
     }
 
     private void validatePdf(byte[] bytes) {
-        if (!new String(bytes, 0, Math.min(bytes.length, 8), StandardCharsets.US_ASCII).startsWith("%PDF-")) {
-            throw DocumentException.invalid("Invalid PDF content.");
-        }
-        try (var source = new RandomAccessReadBuffer(bytes)) {
-            PDFParser parser = new PDFParser(source);
-            try (var document = parser.parse(false)) {
-                if (document.isEncrypted() || document.getNumberOfPages() < 1 || document.getNumberOfPages() > 200) {
-                    throw DocumentException.invalid("PDF must be unencrypted and contain 1..200 pages.");
-                }
-                boolean text = false;
-                int remaining = 20 * 1024 * 1024;
-                for (var page : document.getPages()) {
-                    byte[] stream;
-                    try (var input = page.getContents()) { stream = input.readNBytes(remaining + 1); }
-                    remaining -= stream.length;
-                    if (remaining < 0) throw DocumentException.invalid("PDF content streams exceed the validation limit.");
-                    PDFStreamParser tokens = new PDFStreamParser(stream);
-                    try {
-                        Object token;
-                        boolean stringOperand = false;
-                        while ((token = tokens.parseNextToken()) != null) {
-                            if (token instanceof COSString s && s.getBytes().length > 0) stringOperand = true;
-                            if (token instanceof COSArray a) {
-                                for (var element : a) if (element instanceof COSString s && s.getBytes().length > 0) stringOperand = true;
-                            }
-                            if (token instanceof Operator op) {
-                                if (stringOperand && Set.of("Tj", "TJ", "'", "\"").contains(op.getName())) text = true;
-                                stringOperand = false;
-                            }
-                        }
-                    } finally { tokens.close(); }
-                }
-                if (!text) throw DocumentException.invalid("PDF must contain page text; scanned PDFs are unsupported.");
-            }
-        } catch (IOException | RuntimeException ex) {
-            if (ex instanceof DocumentException validation) throw validation;
-            throw DocumentException.invalid("Malformed or unsupported PDF.");
+        try { extractor.extract(bytes, "application/pdf"); }
+        catch (dev.traceback.extraction.ExtractionFailure ex) {
+            if(ex.code().equals("FILE_LIMIT"))throw oversized();
+            if (java.util.Set.of("PARSER_UNAVAILABLE", "PARSER_BUSY", "EXTRACTION_INTERRUPTED").contains(ex.code()))
+                throw DocumentException.storage();
+            throw DocumentException.invalid("Malformed, unextractable or limit-exceeding PDF.");
         }
     }
 

@@ -36,6 +36,27 @@ traceback:
     storage-directory: ${DOCUMENT_STORAGE_DIRECTORY:${user.home}/.local/share/traceback/documents}
     max-file-size-bytes: ${DOCUMENT_MAX_FILE_SIZE_BYTES:10485760}
     provider: ${DOCUMENT_STORAGE_PROVIDER:LOCAL}
+  extraction:
+    image: ${PDF_EXTRACTION_IMAGE:traceback-pdf:m12}
+    max-file-bytes: ${EXTRACTION_MAX_FILE_BYTES:10485760}
+    max-pages: ${EXTRACTION_MAX_PAGES:200}
+    max-text: ${EXTRACTION_MAX_TEXT:1000000}
+    timeout-seconds: ${EXTRACTION_TIMEOUT_SECONDS:30}
+  indexing:
+    enabled: ${INDEXING_ENABLED:false}
+    chunk-size: ${INDEX_CHUNK_SIZE:1600}
+    overlap: ${INDEX_CHUNK_OVERLAP:160}
+    max-chunks: ${INDEX_MAX_CHUNKS:512}
+    lease-seconds: 90
+    heartbeat-seconds: 30
+    deadline-seconds: 600
+    max-attempts: 5
+  embedding:
+    endpoint: ${EMBEDDING_ENDPOINT:http://127.0.0.1:11435}
+    model: ${EMBEDDING_MODEL:nomic-embed-text:v1.5}
+    digest: ${EMBEDDING_MODEL_DIGEST:sha256:0000000000000000000000000000000000000000000000000000000000000000}
+    dimensions: ${EMBEDDING_DIMENSIONS:768}
+    timeout-ms: ${EMBEDDING_TIMEOUT_MS:20000}
   runtime: ${TRACEBACK_RUNTIME:api}
   aws:
     enabled: ${LOCAL_AWS_ENABLED:false}

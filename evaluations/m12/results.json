@@ -1,0 +1,712 @@
+{
+  "date" : "2026-10-14",
+  "datasetSha256" : "7a84a7de2e2c1ac1c834284f5cca69374dc7bf8699137baf00cb35a814be8552",
+  "model" : "nomic-embed-text:v1.5",
+  "modelDigest" : "sha256:0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f",
+  "configuration" : "b89b1f2f7ec1e55758491cc66869dabbdf819c114cb648a47e439c63b6dbcb24",
+  "dimensions" : 768,
+  "pgvectorVersion" : "0.8.7",
+  "documentsPerTenant" : 5,
+  "chunksPerTenant" : 10,
+  "queries" : 10,
+  "metrics" : {
+    "keyword" : {
+      "recallAt5" : 0.6,
+      "recallAt3" : 0.6,
+      "mrrAt5" : 0.6
+    },
+    "semantic" : {
+      "recallAt5" : 1.0,
+      "recallAt3" : 1.0,
+      "mrrAt5" : 1.0
+    },
+    "hybrid" : {
+      "recallAt5" : 1.0,
+      "recallAt3" : 1.0,
+      "mrrAt5" : 1.0
+    }
+  },
+  "foreignResults" : 0,
+  "observations" : [ {
+    "query" : "PostgreSQL connection timeout",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Connection diagnosis",
+      "rank" : 1,
+      "document" : "database"
+    } ],
+    "kind" : "exact",
+    "mode" : "keyword"
+  }, {
+    "query" : "HTTP 503",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Upstream failure",
+      "rank" : 1,
+      "document" : "api"
+    } ],
+    "kind" : "exact",
+    "mode" : "keyword"
+  }, {
+    "query" : "AUTH_TOKEN_EXPIRED",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Expired session",
+      "rank" : 1,
+      "document" : "authentication"
+    } ],
+    "kind" : "exact",
+    "mode" : "keyword"
+  }, {
+    "query" : "rollback deployment",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Rollback",
+      "rank" : 1,
+      "document" : "deployment"
+    } ],
+    "kind" : "exact",
+    "mode" : "keyword"
+  }, {
+    "query" : "OutOfMemoryError",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Root cause",
+      "rank" : 1,
+      "document" : "postmortem"
+    } ],
+    "kind" : "exact",
+    "mode" : "keyword"
+  }, {
+    "query" : "the service cannot obtain a database socket",
+    "results" : [ ],
+    "kind" : "paraphrase",
+    "mode" : "keyword"
+  }, {
+    "query" : "requests fail because upstream instances are not ready",
+    "results" : [ ],
+    "kind" : "paraphrase",
+    "mode" : "keyword"
+  }, {
+    "query" : "my login stopped working after the session aged out",
+    "results" : [ ],
+    "kind" : "paraphrase",
+    "mode" : "keyword"
+  }, {
+    "query" : "restore last known good application release",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Rollback",
+      "rank" : 1,
+      "document" : "deployment"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "keyword"
+  }, {
+    "query" : "why did the JVM die while retaining too many response objects",
+    "results" : [ ],
+    "kind" : "paraphrase",
+    "mode" : "keyword"
+  }, {
+    "query" : "PostgreSQL connection timeout",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Connection diagnosis",
+      "rank" : 1,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 2,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 5,
+      "document" : "api"
+    } ],
+    "kind" : "exact",
+    "mode" : "semantic"
+  }, {
+    "query" : "HTTP 503",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Upstream failure",
+      "rank" : 1,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 2,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 3,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 4,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 5,
+      "document" : "deployment"
+    } ],
+    "kind" : "exact",
+    "mode" : "semantic"
+  }, {
+    "query" : "AUTH_TOKEN_EXPIRED",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Expired session",
+      "rank" : 1,
+      "document" : "authentication"
+    }, {
+      "relevant" : false,
+      "section" : "Invalid signature",
+      "rank" : 2,
+      "document" : "authentication"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 3,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 4,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "exact",
+    "mode" : "semantic"
+  }, {
+    "query" : "rollback deployment",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Rollback",
+      "rank" : 1,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 2,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 3,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Follow-up actions",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "exact",
+    "mode" : "semantic"
+  }, {
+    "query" : "OutOfMemoryError",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Root cause",
+      "rank" : 1,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 2,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 3,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Follow-up actions",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 5,
+      "document" : "api"
+    } ],
+    "kind" : "exact",
+    "mode" : "semantic"
+  }, {
+    "query" : "the service cannot obtain a database socket",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Connection diagnosis",
+      "rank" : 1,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 2,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 5,
+      "document" : "deployment"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "semantic"
+  }, {
+    "query" : "requests fail because upstream instances are not ready",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Upstream failure",
+      "rank" : 1,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 2,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 3,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 4,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "semantic"
+  }, {
+    "query" : "my login stopped working after the session aged out",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Expired session",
+      "rank" : 1,
+      "document" : "authentication"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 2,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 3,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 4,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "semantic"
+  }, {
+    "query" : "restore last known good application release",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Rollback",
+      "rank" : 1,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 2,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 4,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 5,
+      "document" : "api"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "semantic"
+  }, {
+    "query" : "why did the JVM die while retaining too many response objects",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Root cause",
+      "rank" : 1,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Follow-up actions",
+      "rank" : 2,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 4,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "semantic"
+  }, {
+    "query" : "PostgreSQL connection timeout",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Connection diagnosis",
+      "rank" : 1,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 2,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 5,
+      "document" : "api"
+    } ],
+    "kind" : "exact",
+    "mode" : "hybrid"
+  }, {
+    "query" : "HTTP 503",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Upstream failure",
+      "rank" : 1,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 2,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 3,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 4,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 5,
+      "document" : "deployment"
+    } ],
+    "kind" : "exact",
+    "mode" : "hybrid"
+  }, {
+    "query" : "AUTH_TOKEN_EXPIRED",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Expired session",
+      "rank" : 1,
+      "document" : "authentication"
+    }, {
+      "relevant" : false,
+      "section" : "Invalid signature",
+      "rank" : 2,
+      "document" : "authentication"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 3,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 4,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "exact",
+    "mode" : "hybrid"
+  }, {
+    "query" : "rollback deployment",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Rollback",
+      "rank" : 1,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 2,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 3,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Follow-up actions",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "exact",
+    "mode" : "hybrid"
+  }, {
+    "query" : "OutOfMemoryError",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Root cause",
+      "rank" : 1,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 2,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 3,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Follow-up actions",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 5,
+      "document" : "api"
+    } ],
+    "kind" : "exact",
+    "mode" : "hybrid"
+  }, {
+    "query" : "the service cannot obtain a database socket",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Connection diagnosis",
+      "rank" : 1,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 2,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 4,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 5,
+      "document" : "deployment"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "hybrid"
+  }, {
+    "query" : "requests fail because upstream instances are not ready",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Upstream failure",
+      "rank" : 1,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 2,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 3,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 4,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "hybrid"
+  }, {
+    "query" : "my login stopped working after the session aged out",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Expired session",
+      "rank" : 1,
+      "document" : "authentication"
+    }, {
+      "relevant" : false,
+      "section" : "Root cause",
+      "rank" : 2,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 3,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 4,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Connection diagnosis",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "hybrid"
+  }, {
+    "query" : "restore last known good application release",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Rollback",
+      "rank" : 1,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Release verification",
+      "rank" : 2,
+      "document" : "deployment"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 4,
+      "document" : "database"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 5,
+      "document" : "api"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "hybrid"
+  }, {
+    "query" : "why did the JVM die while retaining too many response objects",
+    "results" : [ {
+      "relevant" : true,
+      "section" : "Root cause",
+      "rank" : 1,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Follow-up actions",
+      "rank" : 2,
+      "document" : "postmortem"
+    }, {
+      "relevant" : false,
+      "section" : "Traffic recovery",
+      "rank" : 3,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Upstream failure",
+      "rank" : 4,
+      "document" : "api"
+    }, {
+      "relevant" : false,
+      "section" : "Database recovery",
+      "rank" : 5,
+      "document" : "database"
+    } ],
+    "kind" : "paraphrase",
+    "mode" : "hybrid"
+  } ],
+  "limitations" : [ "Small synthetic English corpus; no production relevance claim", "One labeled relevant section per query", "Real local inference; JWT decoder mocked for application authorization", "No approximate vector index or reranker" ]
+}

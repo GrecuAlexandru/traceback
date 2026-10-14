@@ -7,13 +7,14 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 class IngestionMigrationIntegrationTest {
-    @Container static PostgreSQLContainer postgres=new PostgreSQLContainer("postgres:17-alpine");
+    @Container static PostgreSQLContainer postgres=new PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg17").asCompatibleSubstituteFor("postgres"));
     @Test void v5UpgradePreservesImmutableLocalHistoryAndTenantConstraints() {
         var config=Flyway.configure().dataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword()).locations("classpath:db/migration");
         config.target("5").load().migrate();
@@ -29,7 +30,7 @@ class IngestionMigrationIntegrationTest {
         jdbc.update("UPDATE documents SET status='AVAILABLE',current_revision_id=? WHERE id=?",rev,doc);
         var documentBefore=jdbc.queryForObject("SELECT row_to_json(d)::text FROM documents d",String.class);
         var revisionBefore=jdbc.queryForObject("SELECT to_jsonb(r)::text FROM document_revisions r",String.class);
-        var latest=Flyway.configure().dataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword()).locations("classpath:db/migration").load();
+        var latest=Flyway.configure().dataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword()).locations("classpath:db/migration").target("6").load();
         assertEquals(1,latest.migrate().migrationsExecuted);latest.validate();
         assertEquals(documentBefore,jdbc.queryForObject("SELECT row_to_json(d)::text FROM documents d",String.class));
         assertEquals(revisionBefore,jdbc.queryForObject("SELECT (to_jsonb(r)-'storage_provider')::text FROM document_revisions r",String.class));

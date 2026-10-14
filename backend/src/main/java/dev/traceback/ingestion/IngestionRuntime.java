@@ -16,16 +16,17 @@ public class IngestionRuntime {
     private final IngestionRepository repository;
     private final MeterRegistry metrics;
     private final boolean worker;
+    private final dev.traceback.indexing.IndexRepository indexing;
     public IngestionRuntime(OutboxDispatcher dispatcher,QueueConsumer consumer,IngestionRepository repository,MeterRegistry metrics,
-                            @Value("${traceback.runtime:api}") String role) {
-        this.dispatcher=dispatcher;this.consumer=consumer;this.repository=repository;this.metrics=metrics;worker=role.equals("worker");
+                            @Value("${traceback.runtime:api}") String role,dev.traceback.indexing.IndexRepository indexing) {
+        this.dispatcher=dispatcher;this.consumer=consumer;this.repository=repository;this.metrics=metrics;worker=role.equals("worker");this.indexing=indexing;
     }
     @Scheduled(fixedDelayString="${traceback.ingestion.poll-delay-ms:1000}")
     public void dispatch() { run("dispatch",()-> { for (int i=0;i<20 && dispatcher.dispatchOne();i++) { /* bounded batch */ } }); }
     @Scheduled(fixedDelayString="${traceback.ingestion.poll-delay-ms:1000}")
     public void consume() { if (worker) run("consume",consumer::pollOnce); }
     @Scheduled(fixedDelayString="${traceback.ingestion.recovery-delay-ms:30000}")
-    public void recover() { run("recovery",()->repository.reconcile()); }
+    public void recover() { run("recovery",()->{ repository.reconcile();indexing.reconcile(); }); }
     private void run(String operation,Runnable action) {
         try { action.run(); }
         catch (RuntimeException ex) {
