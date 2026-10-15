@@ -4,6 +4,11 @@
 **Baseline inspected:** Local `codex/m17-deployment-readiness`, 2026-10-15; M9A–M16 approved locally by the M17 request. M17 packaging/readiness is implemented locally; cloud deployment remains blocked/unapproved. See [M17](M17_DEPLOYMENT.md).
 **Rule:** Sections labeled **CURRENT** describe code found in the repository; **PLANNED** sections are not implemented claims.
 
+The user-requested persistent synthetic demo uses a separate `traceback-demo` project,
+private named PostgreSQL/identity/source volumes and the existing LOCAL provider. See
+[local demo](LOCAL_DEMO.md). The M17 verification project remains disposable. The user-authorized
+[low-memory MCP mode](LOCAL_MCP_DEMO.md) reuses this data with models and processing paused.
+
 ## 1. Purpose
 
 Traceback is a technical incident and engineering-knowledge platform. Teams will record incidents and resolutions, ingest runbooks and postmortems, find similar failures, and ask an AI assistant for evidence-backed investigation suggestions. A local secured MCP server exposes selected read-only knowledge tools to other AI clients.

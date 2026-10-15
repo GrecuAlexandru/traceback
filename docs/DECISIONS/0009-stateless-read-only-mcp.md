@@ -66,3 +66,8 @@ limits, streaming, write tools, autonomous agents and deployment remain out of s
 
 See [M14_SECURE_MCP.md](../M14_SECURE_MCP.md) for contracts, exact configuration,
 real client/Keycloak results, regression commands and remaining limitations.
+
+**User-authorized persistent local demo (2026-10-15):** The separate demo now has an
+opt-in low-memory MCP mode, dedicated resource-indicator/PKCE clients and a native
+read-only test CLI. Existing listener, token, membership and source checks are retained.
+AI/worker runtimes are paused. See [local MCP demo](../LOCAL_MCP_DEMO.md).

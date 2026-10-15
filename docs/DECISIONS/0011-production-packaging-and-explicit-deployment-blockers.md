@@ -61,3 +61,9 @@ fixture verification, costs, runbooks and remaining blockers. No real cloud reso
 production credential, development realm, existing document or historical migration was
 modified; no commit/push/deployment occurred. Cloud proposals in that report remain
 unverified until the explicit approval and evidence checklist is completed.
+
+**Persistent demo follow-up (user requested, 2026-10-15):** A separate `traceback-demo`
+project persists PostgreSQL, Keycloak identity and private LOCAL originals with named
+volumes. It reuses the accepted adapters, singleton runtime and installed models. The
+M17 verification project remains disposable; no cloud readiness or deployment decision
+changes. See [local demo](../LOCAL_DEMO.md).

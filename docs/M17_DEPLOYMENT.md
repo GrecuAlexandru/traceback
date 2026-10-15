@@ -174,6 +174,10 @@ The scripts target the exact owned `traceback-m17` synthetic project; reserve th
 name and do not repurpose it for user data. A PostgreSQL restart loses its tmpfs data by
 design. Keycloak/emulator containers are disposable; none is a production backup solution.
 
+For a populated demo that survives container recreation, use the separate
+[persistent local demo](LOCAL_DEMO.md), not the disposable project above. It preserves
+local sources with the existing LOCAL adapter and stores derived artifacts in PostgreSQL.
+
 ## API ownership and frontend sessions
 
 The upload reservation commits before storage I/O; startup later reconciles all pending

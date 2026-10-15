@@ -1,0 +1,41 @@
+# Opt-in low-memory MCP mode. Always combine with compose.demo.yaml via manage.py mcp.
+services:
+  loopback:
+    # Reuse the installed Node runtime for a byte-preserving Docker port forward.
+    # The backend itself binds loopback; published host ports remain loopback-only.
+    image: traceback-frontend:m17
+    entrypoint: [node, /opt/traceback/loopback-proxy.mjs]
+    command: []
+    volumes:
+      - ./scripts/demo/loopback-proxy.mjs:/opt/traceback/loopback-proxy.mjs:ro
+    mem_limit: 64m
+    cpus: 0.2
+    pids_limit: 32
+    healthcheck: {disable: true}
+  frontend:
+    environment:
+      BACKEND_ORIGIN: http://127.0.0.1:18081
+  keycloak:
+    command: [start-dev, --http-port=18181, --features=resource-indicators, --import-realm, --health-enabled=true, --hostname=http://127.0.0.1:18181]
+  api:
+    environment:
+      SERVER_ADDRESS: 127.0.0.1
+      SERVER_PORT: "18081"
+      LOCAL_AWS_ENABLED: "false"
+      INDEXING_ENABLED: "false"
+      CHAT_ENABLED: "false"
+      MCP_ENABLED: "true"
+      MCP_RESOURCE: http://127.0.0.1:18081/mcp
+      MCP_AUDIENCE: http://127.0.0.1:18081/mcp
+    depends_on: !override
+      frontend: {condition: service_started}
+      keycloak: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+  worker:
+    profiles: [processing]
+  localstack:
+    profiles: [processing]
+  ollama:
+    profiles: [ai]
+  chat-ollama:
+    profiles: [ai]

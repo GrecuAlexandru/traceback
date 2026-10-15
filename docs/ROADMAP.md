@@ -183,6 +183,10 @@ real local inference/Keycloak, deterministic fixtures, static/mocked Terraform a
 cloud assumptions. [ADR-0011](DECISIONS/0011-production-packaging-and-explicit-deployment-blockers.md)
 records the packaging boundary. Stop for M17 review; do not deploy or begin another milestone.
 
+The subsequent user-requested [persistent synthetic demo](LOCAL_DEMO.md) is a local
+M17 follow-up using separate named volumes and existing storage/authentication paths;
+it does not approve deployment or begin the next milestone.
+
 ## Definition of done — every milestone
 
 - [ ] Scope matches this milestone; no unrelated speculative features.
