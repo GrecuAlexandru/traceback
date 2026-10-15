@@ -1,6 +1,6 @@
 # Traceback — Development Roadmap
 
-**Last source review:** Local `codex/m16-frontend`, 2026-10-15; M9A–M15 approved for local development by the M16 request. M16 is implemented locally; review pending. See its verification report for exact evidence.
+**Last source review:** Local `codex/m17-deployment-readiness`, 2026-10-15; M9A–M16 approved locally by the M17 request. M17 is implemented/verified locally; review pending and AWS deployment remains blocked. See [M17](M17_DEPLOYMENT.md).
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
@@ -145,7 +145,7 @@ production exposure. M12/M13 historical results are preserved.
 commands, actual results, pre/post dependency scans, risk register and production gaps.
 Approved for local development by the M16 request; this is not production security certification. Historical M15 evidence remains unchanged.
 
-## M16 — Full Next.js frontend with Meta Astryx — IMPLEMENTED LOCALLY; REVIEW PENDING
+## M16 — Full Next.js frontend with Meta Astryx — APPROVED for local development
 
 **Delivered:** Strict TypeScript/React 19 App Router application, pinned Astryx Neutral,
 server-managed Keycloak Code + S256 PKCE and token-free browser sessions, organization
@@ -159,13 +159,29 @@ Keycloak configuration. See [M16_FRONTEND.md](M16_FRONTEND.md) and
 real local browser-to-Keycloak/backend organization/incident/document/index/search/chat/
 citation/source-supersession smoke with disposable data. The report distinguishes actual
 real-service evidence from deterministic OIDC/REST fixtures and records limitations.
-M16 requires user review before M17; no production deployment approval is implied.
+M16 is approved locally by the M17 request; no production deployment approval is implied.
 
-## M17 — Packaging, deployment, and portfolio release — PLANNED
+## M17 — Infrastructure, deployment and production readiness — IMPLEMENTED LOCALLY; REVIEW PENDING
 
-**Deliver:** Docker setup, CI test gates, health/metrics/tracing, Terraform and controlled AWS demo deployment (ECS/RDS/S3/SQS as justified), architecture diagrams, README, screenshots/video, and a synthetic demonstration dataset.
+**Scope:** The user-approved M17 request supersedes the older deploy-a-demo acceptance.
+No AWS provisioning/public deployment or expense is authorized.
 
-**Acceptance:** Clean checkout can build/test; cloud resources can be deployed and torn down with approval; costs and security caveats documented; real demo works end-to-end.
+**Delivered:** Production-default guarded API/worker/parser/standalone frontend images,
+explicit AWS SDK/KMS configuration, one-shot migrations/restricted DB roles, writer health,
+private LOCAL compatibility checks, isolated real-Keycloak container topology/smoke/restore,
+validated Terraform foundations, dependency/container/IaC and release-preparation CI gates,
+operational/backup/rollback/identity/network/inference runbooks and sourced cost estimates.
+V1–V8, tenant/RBAC/citation boundaries and approved model identities remain intact.
+
+**Constraints:** One API writer and one frontend process remain enforced/documented;
+frontend restarts require sign-in. No full cloud service is declared production-ready.
+PDF cloud isolation/adapter, approved region/account/budget, production IdP/TLS/secret/
+collector wiring and real IAM/RDS/deployment validation remain explicit prerequisites.
+
+**Evidence:** [M17_DEPLOYMENT.md](M17_DEPLOYMENT.md) separates complete local checks,
+real local inference/Keycloak, deterministic fixtures, static/mocked Terraform and untested
+cloud assumptions. [ADR-0011](DECISIONS/0011-production-packaging-and-explicit-deployment-blockers.md)
+records the packaging boundary. Stop for M17 review; do not deploy or begin another milestone.
 
 ## Definition of done — every milestone
 

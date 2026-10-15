@@ -1,0 +1,195 @@
+{
+  "recordedAtUTC": "2026-10-15T08:01:52.960844+00:00",
+  "scope": "M17 local verification only; cloud deployment blocked/unapproved",
+  "sourceBaseline": "255d35e414de6c92b922cdfdc69cf42d4a5d1517",
+  "branch": "codex/m17-deployment-readiness",
+  "uncommitted": true,
+  "java": {
+    "JAVA_HOME": "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+    "cleanTest": {
+      "passed": true,
+      "summary": "[INFO] Tests run: 244, Failures: 0, Errors: 0, Skipped: 0"
+    },
+    "verify": {
+      "passed": true,
+      "summary": "[INFO] Tests run: 244, Failures: 0, Errors: 0, Skipped: 0"
+    }
+  },
+  "frontend": {
+    "commands": [
+      "npm ci",
+      "npm run typecheck",
+      "npm run lint",
+      "npm run test",
+      "npm run build",
+      "npm run test:e2e",
+      "npm audit",
+      "npx prettier --check src tests e2e scripts '*.ts' '*.mjs'",
+      "npm run astryx -- theme build src/theme/traceback.source.ts --out src/theme/traceback.css --check"
+    ],
+    "passed": true,
+    "unitTests": 37,
+    "unitFiles": 7,
+    "chromiumTests": 14,
+    "skipped": 0,
+    "fixturePorts": [
+      8768,
+      18090
+    ],
+    "browserPlugin": "unavailable; regular Playwright used"
+  },
+  "terraform": {
+    "version": "1.16.6",
+    "awsProvider": "6.69.0",
+    "commands": [
+      "fmt -check -recursive",
+      "init -backend=false -input=false -lockfile=readonly",
+      "validate",
+      "test"
+    ],
+    "passed": true,
+    "mockedPlans": 3,
+    "realAwsPlan": false
+  },
+  "containerSmoke": {
+    "passed": true,
+    "environment": "disposable local containers + real Keycloak",
+    "indexing": true,
+    "realChat": false,
+    "frontendRestart": true,
+    "checks": [
+      "PKCE login",
+      "opaque cookie",
+      "session restore",
+      "organization selection",
+      "incident CRUD",
+      "CSRF",
+      "MCP disabled",
+      "upload/download",
+      "worker restart",
+      "PDF sandbox",
+      "search",
+      "conversation persistence",
+      "logout",
+      "console"
+    ]
+  },
+  "realModelSmoke": {
+    "passed": true,
+    "environment": "disposable local containers + real Keycloak",
+    "indexing": true,
+    "realChat": true,
+    "frontendRestart": true,
+    "checks": [
+      "PKCE login",
+      "opaque cookie",
+      "session restore",
+      "organization selection",
+      "incident CRUD",
+      "CSRF",
+      "MCP disabled",
+      "upload/download",
+      "worker restart",
+      "PDF sandbox",
+      "search",
+      "conversation persistence",
+      "logout",
+      "console"
+    ]
+  },
+  "imageGuards": "PASS: unconfigured production API/frontend refuse startup; second S3-only API writer rejected",
+  "oneShotMigration": "PASS: one-shot image migration applies V1-V8 to a new disposable DB; repeat validates/no-ops",
+  "databaseAndObjectRestore": {
+    "passed": true,
+    "availableRevisionsAtSnapshot": 4,
+    "targets": "new disposable DB and emulator bucket; source retained",
+    "history": "V1-V8",
+    "allByteChecksums": true,
+    "realRdsPitr": false,
+    "guaranteedRpoRto": false
+  },
+  "images": [
+    {
+      "role": "api",
+      "id": "sha256:114702f5aa5c67370c9b50f3b48d6e1f1e1929cab8874fb283a6737b5be21928",
+      "platform": "linux/arm64",
+      "user": "10001:10001",
+      "trivyHighCriticalMatches": 0,
+      "scanTargets": 3
+    },
+    {
+      "role": "worker",
+      "id": "sha256:1edd42e984a967421118d66058d4b9c1b34644da3325ac2a5ca24080902eb38b",
+      "platform": "linux/arm64",
+      "user": "10001:10001",
+      "trivyHighCriticalMatches": 0,
+      "scanTargets": 3
+    },
+    {
+      "role": "pdf",
+      "id": "sha256:e2b023a436cc85e9ca077d46ac80cdcd0b0f9a8c52b7f7adfdd08575690580ee",
+      "platform": "linux/arm64",
+      "user": "65534:65534",
+      "trivyHighCriticalMatches": 0,
+      "scanTargets": 2
+    },
+    {
+      "role": "frontend",
+      "id": "sha256:458eb7e793561da9f240dffa6e051dfea632e6e557661b8a1e6b13d9c9e9d053",
+      "platform": "linux/arm64",
+      "user": "node",
+      "trivyHighCriticalMatches": 0,
+      "scanTargets": 2
+    }
+  ],
+  "sourceScans": {
+    "evaluatedAtUTC": "2026-10-15T07:58:56.481383+00:00",
+    "sbomSha256": "f247e7c4bd12ecfe9e1aa2600aa556c133215a3b96a123cdbaca2aea81ac746c",
+    "packagesInSbom": 237,
+    "gitleaksVersion": "8.30.1",
+    "osvVersion": "osv-scanner version: 2.7.0",
+    "gitleaksExitCode": 0,
+    "osvExitCode": 0,
+    "secretFindings": 0,
+    "vulnerablePackages": 0,
+    "advisories": [],
+    "limitations": [
+      "Current nonignored source, not Git history or ignored local credentials",
+      "OSV online vulnerability database and GitHub release downloads are network dependencies",
+      "SBOM package match does not establish exploit reachability; no container image vulnerability scan"
+    ]
+  },
+  "infrastructureScan": {
+    "scanner": "Trivy 0.76.0",
+    "severityGate": [
+      "HIGH",
+      "CRITICAL"
+    ],
+    "findings": 0
+  },
+  "limitations": [
+    "No AWS account/provisioning or real IAM/TLS/RDS verification",
+    "Images locally tested linux/arm64; hosted amd64 CI not run",
+    "PDF cloud runtime/adapter requires reviewed implementation and validation",
+    "One API writer and one frontend process; restart sign-in",
+    "Historical LOCAL/S3 bucket cutover requires inventory/copy verification",
+    "Production IdP/ingress/secret injection/collector/notification wiring pending",
+    "No new exhaustive Codex Security audit or production-security certification"
+  ],
+  "externalEffects": {
+    "awsProvisioned": false,
+    "publicDeployment": false,
+    "newModelDownloads": false,
+    "paidProvider": false,
+    "commits": false,
+    "pushes": false,
+    "pullRequests": false
+  },
+  "cleanup": {
+    "ownedSyntheticStackStopped": true,
+    "dockerVolumesRemoved": false,
+    "existingDeveloperStackModified": false,
+    "syntheticDatabaseStorage": "disposable tmpfs",
+    "approvedModelWeightsPreserved": true
+  }
+}

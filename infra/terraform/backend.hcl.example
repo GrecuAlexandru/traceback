@@ -1,0 +1,7 @@
+# Existing backend, bootstrapped only under separate approval. No credentials here.
+bucket = "REVIEWED_STATE_BUCKET"
+key = "traceback/APPROVED_ENVIRONMENT/terraform.tfstate"
+region = "APPROVED_REGION"
+encrypt = true
+use_lockfile = true
+# kms_key_id = "REVIEWED_STATE_KEY_ARN"

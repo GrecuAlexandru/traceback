@@ -1,0 +1,8 @@
+# Supply region/account/AZs after explicit approval, in a different encrypted state key.
+environment = "production"
+postgres_version = "17.11" # Verify target region availability before any live plan.
+db_instance_class = "db.t4g.medium"
+multi_az = true
+nat_gateways = 2
+backup_retention_days = 14
+log_retention_days = 30

@@ -15,3 +15,13 @@ node_modules/
 *.tsbuildinfo
 playwright-report/
 test-results/
+
+# Terraform plans/state can include credentials and private infrastructure metadata.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.auto.tfvars
+*.tfvars
+!*.tfvars.example
+crash.log

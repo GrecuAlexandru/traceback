@@ -71,3 +71,8 @@ See [M16_FRONTEND.md](../M16_FRONTEND.md) for actual contracts, commands, determ
 versus real smoke evidence, visual findings, local setup and remaining limitations.
 No Java source, migration, authentication policy, original source data or historical
 model-evaluation artifact is changed by M16.
+
+**M17 deployment limit:** M16 is approved locally by the M17 request. Session storage remains
+one-process memory; the proposed initial topology is one Node process with restart/release
+sign-in required, explicitly guarded by production configuration. No distributed session or
+rolling-release session survival is claimed. See [ADR-0011](0011-production-packaging-and-explicit-deployment-blockers.md).

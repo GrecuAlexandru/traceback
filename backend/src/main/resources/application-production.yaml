@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:8}
+      minimum-idle: 2
+      max-lifetime: 1500000
+      keepalive-time: 120000
+      connection-init-sql: "SET lock_timeout = '5s'; SET statement_timeout = '30s'; SET idle_in_transaction_session_timeout = '30s'"
+  flyway:
+    enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER}
+          audiences: [traceback-api]
+  lifecycle:
+    timeout-per-shutdown-phase: 25s
+  task:
+    scheduling:
+      shutdown:
+        await-termination: true
+        await-termination-period: 20s
+traceback:
+  deployment:
+    validate-schema: true
+    api-replicas: ${API_REPLICAS:1}
+    extraction-runtime: ${EXTRACTION_RUNTIME}
+  documents:
+    provider: S3
+    legacy-enabled: ${LEGACY_STORAGE_ENABLED:true}
+    storage-directory: ${DOCUMENT_STORAGE_DIRECTORY:/var/lib/traceback/documents}
+  extraction:
+    image: ${PDF_EXTRACTION_IMAGE}
+  aws:
+    enabled: true
+    mode: aws
+    endpoint: ""
+    region: ${AWS_REGION}
+    bucket: ${S3_BUCKET}
+    queue-name: ${SQS_QUEUE}
+    s3-kms-key: ${S3_KMS_KEY_ARN}
+server:
+  address: 0.0.0.0
+  shutdown: graceful
+  forward-headers-strategy: none
+  tomcat:
+    connection-timeout: 10s
+    max-connections: 200
+    threads:
+      max: 40
+management:
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: readinessState,db,documentRuntime

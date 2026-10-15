@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import * as oidc from "openid-client";
 import { cookies } from "next/headers";
 import { configuration } from "./config";
+import { operationalFailure } from "./operations";
 export type Identity = {
   subject: string;
   username: string | null;
@@ -148,6 +149,7 @@ export async function getSession() {
         s.expires = Date.now() + (tokens.expires_in ?? 0) * 1000;
         if (s.expires <= Date.now()) throw new Error("Expired token");
       } catch {
+        operationalFailure("refresh");
         sessions.delete(id!);
         throw new SessionExpired();
       } finally {

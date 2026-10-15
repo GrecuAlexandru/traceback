@@ -14,4 +14,4 @@ management:
     health:
       group:
         readiness:
-          include: readinessState,db,ingestionDependencies
+          include: readinessState,db

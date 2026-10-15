@@ -2,6 +2,7 @@ import * as oidc from "openid-client";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { configuration } from "@/lib/server/config";
+import { operationalFailure } from "@/lib/server/operations";
 import {
   consumeLogin,
   cookieOptions,
@@ -57,6 +58,7 @@ export async function GET(request: Request) {
     jar.set(sessionCookie, createSession(tokens, identity), cookieOptions());
     return NextResponse.redirect(c.origin + "/");
   } catch {
+    operationalFailure("callback");
     return NextResponse.redirect(
       c.origin + "/login?error=authentication_failed",
     );

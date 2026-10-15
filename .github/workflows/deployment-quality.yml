@@ -1,0 +1,103 @@
+name: Deployment quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: {node-version: '22', cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: npm ci
+      - run: npx prettier --check src tests e2e scripts '*.ts' '*.mjs'
+      - run: npm run typecheck && npm run lint && npm run test && npm run build
+      - run: npm run astryx -- theme build src/theme/traceback.source.ts --out src/theme/traceback.css --check
+      - run: npm audit --audit-level=high
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+  infrastructure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {persist-credentials: false}
+      - run: python3 scripts/deployment/install_tools.py --directory "$RUNNER_TEMP/m17-tools"
+      - run: |
+          export PATH="$RUNNER_TEMP/m17-tools:$PATH"
+          terraform -chdir=infra/terraform fmt -check -recursive
+          terraform -chdir=infra/terraform init -backend=false -input=false -lockfile=readonly
+          terraform -chdir=infra/terraform validate
+          terraform -chdir=infra/terraform test
+          trivy config --tf-vars infra/terraform/tests/scan.tfvars.example --severity HIGH,CRITICAL --exit-code 1 infra/terraform
+      - name: Validate isolated local topology
+        env:
+          M17_FIXTURE_DIRECTORY: /tmp/traceback-m17-ci-fixture
+        run: docker compose --env-file /dev/null -p traceback-m17 -f compose.production-like.yaml config --quiet
+  containers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [api, worker, pdf, frontend]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {persist-credentials: false}
+      - run: python3 scripts/deployment/install_tools.py --directory "$RUNNER_TEMP/m17-tools"
+      - name: Build immutable local artifact with provenance
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          if [ "$TARGET" = frontend ]; then
+            docker build --provenance=mode=max --target runtime -f frontend/Dockerfile -t "traceback-$TARGET:$GITHUB_SHA" .
+          else
+            docker build --provenance=mode=max --target "$TARGET" -f backend/Dockerfile -t "traceback-$TARGET:$GITHUB_SHA" .
+          fi
+          docker image inspect --format '{{.Id}}' "traceback-$TARGET:$GITHUB_SHA" > "$RUNNER_TEMP/image-id.txt"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/source-commit.txt"
+      - name: Scan runtime OS and language packages (errors fail)
+        env:
+          TARGET: ${{ matrix.target }}
+        run: '"$RUNNER_TEMP/m17-tools/trivy" image --parallel 2 --scanners vuln --severity HIGH,CRITICAL --exit-code 1 "traceback-$TARGET:$GITHUB_SHA"'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-identity-${{ matrix.target }}
+          path: |
+            ${{ runner.temp }}/image-id.txt
+            ${{ runner.temp }}/source-commit.txt
+          retention-days: 7
+  local-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '22', cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: npm ci --prefix frontend && cd frontend && npx playwright install --with-deps chromium
+      - name: Private synthetic realm, no model weights or developer volumes
+        run: python3 scripts/deployment/prepare_local.py --directory "$RUNNER_TEMP/traceback-m17-fixture"
+      - name: Build and start local images
+        env:
+          M17_FIXTURE_DIRECTORY: ${{ runner.temp }}/traceback-m17-fixture
+        run: |
+          docker build --target pdf -t traceback-pdf:m17 -f backend/Dockerfile .
+          docker compose --env-file /dev/null -p traceback-m17 -f compose.production-like.yaml up -d --build --wait
+      - name: Real disposable Keycloak and container smoke, no inference
+        env:
+          M17_FIXTURE_DIRECTORY: ${{ runner.temp }}/traceback-m17-fixture
+        run: node scripts/deployment/smoke.mjs
+      - name: Stop only the owned disposable project (never remove volumes)
+        if: always()
+        env:
+          M17_FIXTURE_DIRECTORY: ${{ runner.temp }}/traceback-m17-fixture
+        run: docker compose --env-file /dev/null -p traceback-m17 -f compose.production-like.yaml stop

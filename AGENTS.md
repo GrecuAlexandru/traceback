@@ -117,3 +117,20 @@ End each completed task with:
   Real Keycloak/backend smoke is separate, with synthetic disposable data.
 - Visually inspect major screens, mobile navigation and both themes after UI changes.
   Keep screenshots/logs outside the checkout and never save credentials in artifacts.
+
+## Deployment conventions (M17)
+
+- Read `docs/M17_DEPLOYMENT.md` and ADR-0011 before packaging or infrastructure work.
+- Images default to production guards. Preserve singleton API/BFF, advisory ownership,
+  private legacy routing and stop-before-start release behavior. No active-active claim.
+- Terraform is validated with `init -backend=false`, `validate`, and mocked `test` only.
+  Region/account/AZ fixtures and pricing references never select an approved deployment.
+  No real plan/apply, public ingress, external PR or cloud credentials without authorization.
+- Fargate PDF isolation, production IdP/TLS/secret injection and cloud model operation remain
+  explicit deployment prerequisites. Never mount a daemon socket/credential into a parser.
+- `compose.production-like.yaml` and its optional models overlay are isolated synthetic
+  tests using project `traceback-m17`; never repurpose that name for persistent user data.
+  Preserve developer volumes/realms and model weights. Stop owned services; no `down -v`.
+- Run migrations through the separate one-shot command; reapply reviewed runtime grants.
+  Workers require a minimal document column UPDATE privilege for PostgreSQL row locks,
+  not document ownership/content mutation. Preserve V1–V8 and immutable source metadata.

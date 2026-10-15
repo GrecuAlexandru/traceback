@@ -1,7 +1,7 @@
 # Traceback — Architecture
 
 **Document status:** Living technical specification.  
-**Baseline inspected:** Local `codex/m16-frontend`, 2026-10-15; M9A–M15 approved for local development by the M16 request. M16 is implemented locally; verification and review status are recorded in [M16](M16_FRONTEND.md).
+**Baseline inspected:** Local `codex/m17-deployment-readiness`, 2026-10-15; M9A–M16 approved locally by the M17 request. M17 packaging/readiness is implemented locally; cloud deployment remains blocked/unapproved. See [M17](M17_DEPLOYMENT.md).
 **Rule:** Sections labeled **CURRENT** describe code found in the repository; **PLANNED** sections are not implemented claims.
 
 ## 1. Purpose
@@ -13,6 +13,7 @@ The product must remain useful without AI: incident management, knowledge storag
 ## 2. Current implementation (verified in repository source)
 
 - **Frontend (M16):** Next.js App Router/React 19/strict TypeScript with pinned Meta Astryx Neutral 0.7.0 and precompiled CSS. Local OIDC Code + S256 PKCE BFF keeps tokens in bounded server memory; browser receives an opaque HttpOnly session. Organization-scoped query providers, incident/document management, keyword/semantic/hybrid search, private persistent chat, live citation resolution, safe Markdown, responsive navigation and light/dark settings are implemented. The existing approved loopback client is reused unchanged. See [M16](M16_FRONTEND.md) and [ADR-0010](DECISIONS/0010-nextjs-astryx-and-local-bff-sessions.md).
+- **M17 packaging/readiness:** Non-root multi-stage API/worker/PDF/Next standalone images, explicit production guards, AWS region/default-chain mode and SSE-KMS, one-shot migration command/restricted runtime grants, live writer readiness and LOCAL-inventory rejection for S3-only installs. Isolated real-Keycloak container/restore tests and validated Terraform foundations/CI gates exist; no running AWS compute/ingress/IdP/model or collector is provisioned. One API writer and one frontend process remain required. Production PDF isolation is an explicit deployment blocker. See [M17](M17_DEPLOYMENT.md) and [ADR-0011](DECISIONS/0011-production-packaging-and-explicit-deployment-blockers.md).
 - **Backend:** Java 21 target, Spring Boot 4.1.1, Maven Wrapper (`backend/`).
 - **HTTP API:** `GET /api/v1/ping`, `/api/v1/me`, incident CRUD under `/api/v1/organizations/{organizationId}/incidents` (global incident routes denied), and `POST`/`GET /api/v1/organizations` (M9A).
 - **Incidents:** Organization-owned new incidents; service membership checks and tenant/identity-scoped read/count queries; ADMIN/ENGINEER SQL write predicates; VIEWER read only; pagination/status filtering; version-aware PATCH and DELETE; `@Version` plus atomic SQL compare-and-swap; generic 403/404/409 errors. Repository exposes no unscoped CRUD methods.
@@ -112,7 +113,7 @@ PostgreSQL is the system of record. Spring Data JPA is appropriate for ordinary 
 SQS is at-least-once; a send-before-delivery-commit crash creates duplicates, handled idempotently.
 API startup recovery remains single-writer; workers use database concurrency and read-only legacy
 filesystem access. LOCAL revision keys are never reinterpreted as S3. No existing content is migrated.
-Worker HTTP permits health only. Local endpoints and dummy credentials prevent accidental cloud use.
+Worker HTTP permits health only. Emulator mode requires local endpoints/dummy credentials; M17 adds an explicitly selected AWS mode with required region and standard credential chain (no real AWS use during verification).
 See [M11 lifecycle, operations and limits](M11_DURABLE_INGESTION.md) and [ADR-0006](DECISIONS/0006-ingestion-leases-and-storage-compatibility.md).
 
 **CURRENT M12:** Enabled VERIFIED completion creates durable indexing work/event atomically. Isolated PDFBox extraction (network disabled, bounded memory/CPU/time/tmpfs, verified cgroup v2 limits), strict UTF-8 text extraction and source-aware chunking precede local Ollama embeddings. Indexing has renewable 90-second token leases, 30-second database/SQS heartbeats and a ten-minute per-claim deadline. Checkpointed extraction survives provider retry; complete chunks/vectors/head publish atomically. Tombstone/supersession, stale ownership and failed reindex cannot expose invalid content. Historical derived artifacts remain private. See [M12](M12_EXTRACTION_AND_RETRIEVAL.md) and [ADR-0007](DECISIONS/0007-isolated-extraction-and-index-generations.md).
@@ -161,3 +162,21 @@ identities, session-header reuse, revocation, tombstones and negative tokens are
 Existing Compose Keycloak and persistent databases remain unchanged. Complete final build
 evidence and client/OAuth limitations are recorded in [M14](M14_SECURE_MCP.md). No newer
 2026 protocol, universal automatic OAuth, browser Inspector CORS or deployment claim is made.
+
+## 11. M17 deployment boundary (CURRENT packaging; AWS topology PROPOSED)
+
+The production profile requires verified DB TLS, HTTPS issuer and REST audience, S3/KMS,
+explicit region, runtime migration disabled, schema validate, MCP disabled and singleton
+API ownership. Readiness reflects the reserved advisory-lock connection as well as DB.
+The BFF requires one process with opaque memory sessions; restart requires sign-in.
+Historical LOCAL revision providers remain immutable; either keep the original private
+mount or fail startup on a nonempty LOCAL inventory. Workers retain durable fenced leases.
+
+Terraform implements network/data/operations foundations only, with no account/region
+chosen and no cloud apply. A dedicated trusted Docker host or reviewed new PDF adapter
+must preserve M12 isolation before AWS compute can be approved. Fargate cannot use the
+host-socket sandbox unchanged. Managed Keycloak/HTTPS ingress/runtime secrets/metric
+shipping and separately sized pinned inference remain prerequisites. The local shared
+loopback namespace, trust-auth tmpfs DB and ephemeral emulator are synthetic test-only.
+[M17](M17_DEPLOYMENT.md) records costs, exact evidence, recovery, security findings and
+approval steps; production readiness/deployment is not inferred from scanner passes.

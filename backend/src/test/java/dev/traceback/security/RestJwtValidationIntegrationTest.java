@@ -38,6 +38,8 @@ class RestJwtValidationIntegrationTest {
         r.add("traceback.documents.storage-directory",TestDocumentStorage::directory);
     }
     @LocalServerPort int port;
+    @org.springframework.beans.factory.annotation.Autowired dev.traceback.knowledge.DocumentUploadRecovery recovery;
+    @org.springframework.beans.factory.annotation.Autowired javax.sql.DataSource datasource;
     final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
     static RSAKey key() {try{return new RSAKeyGenerator(2048).keyID("controlled-test-key").generate();}catch(Exception e){throw new ExceptionInInitializerError(e);}}
     static HttpServer issuer() {
@@ -75,7 +77,7 @@ class RestJwtValidationIntegrationTest {
         // Authentication succeeds, but no trusted-human classification grants bootstrap authority.
         assertEquals(403,request("/api/v1/organizations",token(TRUSTED,ISSUER,"traceback-api",future,null)));
     }
-    @Test void postgresOutageMakesReadinessFailWithoutFailingLivenessAndRecovers()throws Exception {
+    @Test void postgresOutageKeepsLivenessAndRequiresWriterOwnershipBeforeReadinessRecovers()throws Exception {
         assertEquals(200,request("/actuator/health/readiness",null));
         var docker=postgres.getDockerClient();String id=postgres.getContainerId();
         docker.pauseContainerCmd(id).exec();
@@ -83,6 +85,21 @@ class RestJwtValidationIntegrationTest {
             assertEquals(200,request("/actuator/health/liveness",null));
             assertEquals(503,request("/actuator/health/readiness",null));
         } finally {docker.unpauseContainerCmd(id).exec();}
+        // A broken reserved advisory-lock connection cannot be silently replaced by a
+        // healthy pooled connection. Production restarts the sole writer; simulate that
+        // recovery lifecycle explicitly after PostgreSQL is available again.
+        long dbDeadline=System.nanoTime()+Duration.ofSeconds(10).toNanos();
+        boolean connected=false;
+        do {
+            try(var connection=datasource.getConnection()){connected=connection.isValid(1);}
+            catch(java.sql.SQLException ignored) { }
+            if(!connected)Thread.sleep(100);
+        }while(!connected && System.nanoTime()<dbDeadline);
+        assertTrue(connected);
+        if(request("/actuator/health/readiness",null)!=200) {
+            try { recovery.close(); } catch(java.sql.SQLException ignored) { /* already broken; reference is cleared */ }
+            recovery.start();
+        }
         long deadline=System.nanoTime()+Duration.ofSeconds(10).toNanos();int status;
         do {status=request("/actuator/health/readiness",null);if(status==200)break;Thread.sleep(100);}while(System.nanoTime()<deadline);
         assertEquals(200,status);assertEquals(200,request("/actuator/health/liveness",null));

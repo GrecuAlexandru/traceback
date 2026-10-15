@@ -1,0 +1,11 @@
+# Deliberately no region, account or AZ selection. Supply only after user approval.
+# region = "APPROVED_REGION"
+# account_id = "APPROVED_ACCOUNT_ID"
+# availability_zones = ["APPROVED_AZ_1", "APPROVED_AZ_2"]
+environment = "demo"
+postgres_version = "17.11" # Example only: verify available version + vector in approved region.
+db_instance_class = "db.t4g.small"
+multi_az = false
+nat_gateways = 0
+backup_retention_days = 7
+log_retention_days = 14

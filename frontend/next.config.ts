@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
+  output: "standalone",
   poweredByHeader: false,
   logging: { incomingRequests: false },
   async headers() {

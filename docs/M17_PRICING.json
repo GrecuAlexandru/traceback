@@ -1,0 +1,82 @@
+{
+  "retrieved": "2026-10-15",
+  "referenceRegion": "us-east-1 (comparison only; not selected for deployment)",
+  "rdsPublicationDate": "2026-10-06T22:40:50Z",
+  "rdsSource": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/us-east-1/index.json",
+  "rdsRates": [
+    {
+      "sku": "5SY529FVXY3EARD8",
+      "type": "db.t4g.small",
+      "deployment": "Multi-AZ",
+      "unit": "Hrs",
+      "usd": "0.0650000000"
+    },
+    {
+      "sku": "6T9XP2QUFF4B5P26",
+      "type": "db.t4g.medium",
+      "deployment": "Single-AZ",
+      "unit": "Hrs",
+      "usd": "0.0650000000"
+    },
+    {
+      "sku": "S9H3AXMBHSKRFJTA",
+      "type": "db.t4g.small",
+      "deployment": "Single-AZ",
+      "unit": "Hrs",
+      "usd": "0.0320000000"
+    },
+    {
+      "sku": "J7S7KD4WFDNQWKNX",
+      "type": "General Purpose-GP3",
+      "deployment": "Multi-AZ",
+      "unit": "GB-Mo",
+      "usd": "0.2300000000"
+    },
+    {
+      "sku": "SCBZU9XX357QUA4D",
+      "type": "db.t4g.medium",
+      "deployment": "Multi-AZ",
+      "unit": "Hrs",
+      "usd": "0.1290000000"
+    },
+    {
+      "sku": "KYVYY29G957PKY3B",
+      "type": "General Purpose-GP3",
+      "deployment": "Single-AZ",
+      "unit": "GB-Mo",
+      "usd": "0.1150000000"
+    }
+  ],
+  "s3Source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.json",
+  "s3PublicationDate": "2026-10-14T20:58:47Z",
+  "s3Rates": [
+    {
+      "sku": "ZWQ6Q48CRJXX4FXE",
+      "usage": "Requests-Tier2",
+      "unit": "Requests",
+      "usd": "0.0000004000"
+    },
+    {
+      "sku": "E9YHNFENF4XQBZR6",
+      "usage": "Requests-Tier1",
+      "unit": "Requests",
+      "usd": "0.0000050000"
+    },
+    {
+      "sku": "WP9ANXZGBYYSGJEA",
+      "usage": "TimedStorage-ByteHrs",
+      "unit": "GB-Mo",
+      "usd": "0.0230000000"
+    }
+  ],
+  "sqsSource": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSQueueService/current/us-east-1/index.json",
+  "sqsPublicationDate": "2026-09-11T12:46:07Z",
+  "sqsRates": [
+    {
+      "sku": "8RN6B8U4MERHRXP3",
+      "usage": "Requests-RBP",
+      "unit": "Requests",
+      "usd": "0.0000004000"
+    }
+  ]
+}

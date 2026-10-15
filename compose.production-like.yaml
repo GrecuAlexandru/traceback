@@ -1,0 +1,152 @@
+# ISOLATED LOCAL TEST ONLY. Does not read compose.yaml or its volumes. Never use in AWS.
+# Use --env-file /dev/null, a unique -p name, and the generated private fixture directory.
+x-java: &java
+  read_only: true
+  tmpfs: ["/tmp:rw,noexec,nosuid,size=128m,uid=10001,gid=10001"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  group_add: ["${M17_DOCKER_GID:-0}"]
+  mem_limit: 1g
+  cpus: 1
+  pids_limit: 160
+  stop_grace_period: 35s
+  network_mode: service:loopback
+  environment: &java-env
+    TRACEBACK_ENVIRONMENT: local-production-like
+    SPRING_PROFILES_ACTIVE: ""
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/traceback_m17?connectTimeout=3&socketTimeout=35
+    SPRING_DATASOURCE_USERNAME: traceback_m17
+    SPRING_DATASOURCE_PASSWORD: ""
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://127.0.0.1:18180/realms/traceback-m17
+    SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE: 25s
+    SPRING_TASK_SCHEDULING_SHUTDOWN_AWAIT_TERMINATION: "true"
+    SPRING_TASK_SCHEDULING_SHUTDOWN_AWAIT_TERMINATION_PERIOD: 20s
+    SERVER_SHUTDOWN: graceful
+    LOCAL_AWS_ENABLED: "true"
+    LOCAL_AWS_ENDPOINT: http://localstack:4566
+    DOCUMENT_STORAGE_PROVIDER: S3
+    DOCUMENT_STORAGE_DIRECTORY: /var/lib/traceback/documents
+    PDF_EXTRACTION_IMAGE: traceback-pdf:m17
+    INDEXING_ENABLED: ${M17_INDEXING_ENABLED:-false}
+    EMBEDDING_ENDPOINT: http://ollama:11434
+    EMBEDDING_MODEL_DIGEST: sha256:0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f
+    CHAT_ENABLED: ${M17_CHAT_ENABLED:-false}
+    CHAT_ENDPOINT: http://chat-ollama:11434
+    CHAT_MODEL_DIGEST: sha256:845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e
+    MCP_ENABLED: "false"
+services:
+  loopback:
+    image: alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+    command: [sleep, infinity]
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 16m
+    cpus: 0.1
+    pids_limit: 8
+    ports: ["127.0.0.1:18765:8765", "127.0.0.1:18180:18180", "127.0.0.1:18080:8080"]
+  frontend:
+    image: traceback-frontend:m17
+    network_mode: service:loopback
+    depends_on:
+      loopback: {condition: service_started}
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      TRACEBACK_ENVIRONMENT: local-production-like
+      APP_ORIGIN: http://127.0.0.1:18765
+      OIDC_ISSUER: http://127.0.0.1:18180/realms/traceback-m17
+      OIDC_CLIENT_ID: traceback-m17-web
+      BACKEND_ORIGIN: http://127.0.0.1:8080
+      ALLOW_LOCAL_HTTP: "true"
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m,uid=1000,gid=1000"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 100
+    stop_grace_period: 15s
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: traceback_m17
+      POSTGRES_USER: traceback_m17
+      POSTGRES_HOST_AUTH_METHOD: trust
+    # Disposable synthetic data only; no published DB port and no developer volumes.
+    tmpfs: [/var/lib/postgresql/data:size=512m]
+    mem_limit: 512m
+    cpus: 1
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U traceback_m17 -d traceback_m17]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    command: [start-dev, --http-port=18180, --import-realm, --health-enabled=true, --hostname=http://127.0.0.1:18180]
+    network_mode: service:loopback
+    depends_on:
+      loopback: {condition: service_started}
+    volumes:
+      - ${M17_FIXTURE_DIRECTORY:?Run scripts/deployment/prepare_local.py first}/realm.json:/opt/keycloak/data/import/realm.json:ro
+    mem_limit: 768m
+    cpus: 1
+    healthcheck:
+      test: [CMD, bash, -ec, "exec 3<>/dev/tcp/127.0.0.1/9000; printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&3; IFS= read -r status <&3; [[ $$status == *'200 OK'* ]]"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+  localstack:
+    image: localstack/localstack:4.8.1
+    environment:
+      SERVICES: s3,sqs
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      SQS_ENDPOINT_STRATEGY: path
+    volumes:
+      - ./scripts/localstack/10-init.sh:/etc/localstack/init/ready.d/10-init.sh:ro
+    mem_limit: 512m
+    cpus: 1
+    healthcheck:
+      test: [CMD-SHELL, awslocal sqs get-queue-url --queue-name traceback-ingestion-local >/dev/null]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  api:
+    <<: *java
+    image: traceback-api:m17
+    build: {context: ., dockerfile: backend/Dockerfile, target: api}
+    environment:
+      <<: *java-env
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "8080"
+    volumes:
+      - legacy:/var/lib/traceback/documents
+      - ${M17_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+    depends_on:
+      frontend: {condition: service_started}
+      keycloak: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+      localstack: {condition: service_healthy}
+  worker:
+    <<: *java
+    image: traceback-worker:m17
+    build: {context: ., dockerfile: backend/Dockerfile, target: worker}
+    environment:
+      <<: *java-env
+      SPRING_PROFILES_ACTIVE: worker
+      SERVER_ADDRESS: 127.0.0.1
+      SERVER_PORT: "8081"
+      SPRING_FLYWAY_ENABLED: "false"
+    volumes:
+      - legacy:/var/lib/traceback/documents:ro
+      - ${M17_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+    depends_on:
+      api: {condition: service_healthy}
+volumes:
+  legacy: {}

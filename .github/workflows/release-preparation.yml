@@ -1,0 +1,41 @@
+name: Approved release preparation (no deployment)
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Reviewed 40-character commit SHA with successful quality workflows
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  prepare:
+    # Configure required reviewers and disallow self-approval in GitHub settings.
+    # Even an unprotected/misconfigured environment cannot mutate AWS: this job has
+    # no id-token permission, AWS credentials, provider initialization or deploy command.
+    environment: deployment-review
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require immutable source identity
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: '[[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]'
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.source_commit }}
+          persist-credentials: false
+      - name: Prepare review bundle only
+        run: |
+          git rev-parse HEAD > source-commit.txt
+          sha256sum backend/Dockerfile frontend/Dockerfile frontend/package-lock.json infra/terraform/.terraform.lock.hcl > release-inputs.sha256
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: approved-deployment-review-bundle
+          path: |
+            source-commit.txt
+            release-inputs.sha256
+            docs/M17_DEPLOYMENT.md
+            infra/terraform
+          retention-days: 7
+          include-hidden-files: true

@@ -1,0 +1,16 @@
+**/.git
+**/.env
+**/.env.*
+**/node_modules
+**/.next
+**/target
+**/test-results
+**/playwright-report
+**/*.pem
+**/*.key
+**/.npmrc
+**/settings.xml
+**/*.tfstate*
+**/.terraform
+evaluations
+.codex

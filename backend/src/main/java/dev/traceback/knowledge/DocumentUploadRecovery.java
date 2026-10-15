@@ -29,6 +29,10 @@ public class DocumentUploadRecovery {
     private String runtime;
     @org.springframework.beans.factory.annotation.Value("${traceback.aws.enabled:false}")
     private boolean awsEnabled;
+    @org.springframework.beans.factory.annotation.Value("${traceback.documents.legacy-enabled:true}")
+    private boolean legacyEnabled;
+    @org.springframework.beans.factory.annotation.Value("${traceback.deployment.validate-schema:false}")
+    private boolean validateSchema;
 
     public DocumentUploadRecovery(JdbcTemplate jdbc, DataSource datasource, DocumentStorage storage, PlatformTransactionManager manager) {
         this.jdbc = jdbc;
@@ -41,8 +45,11 @@ public class DocumentUploadRecovery {
 
     @PostConstruct
     public void start() throws SQLException, IOException {
+        if (validateSchema) dev.traceback.deployment.DatabaseMigration.validateRuntime(datasource);
+        if (!legacyEnabled && jdbc.queryForObject("SELECT count(*) FROM document_revisions WHERE storage_provider='LOCAL'", Long.class) > 0)
+            throw new IllegalStateException("LOCAL revisions require the original private storage mount");
         if ("worker".equals(runtime)) {
-            if (!awsEnabled) throw new IllegalStateException("Worker requires local AWS configuration");
+            if (!awsEnabled) throw new IllegalStateException("Worker requires AWS configuration");
             return;
         }
         // M10 is intentionally a single backend process per database. A session lock

@@ -1,4 +1,5 @@
 import { configuration } from "@/lib/server/config";
+import { operationalFailure } from "@/lib/server/operations";
 import { getSession, sessions, SessionExpired } from "@/lib/server/session";
 import {
   allowedRoute,
@@ -58,6 +59,7 @@ async function proxy(
     });
     if (response.status === 401) sessions.delete(id);
     if (!response.ok) {
+      if (response.status >= 500) operationalFailure("bff");
       let code = "REQUEST_FAILED";
       try {
         const data = await response.json();
@@ -100,6 +102,7 @@ async function proxy(
   } catch (error) {
     if (error instanceof SessionExpired) return problem(401, "SESSION_EXPIRED");
     if (error instanceof RangeError) return problem(413, "BODY_LIMIT");
+    if (!request.signal.aborted) operationalFailure("bff");
     return problem(503, "DEPENDENCY_UNAVAILABLE");
   }
 }

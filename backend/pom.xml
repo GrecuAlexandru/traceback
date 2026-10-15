@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+        <project.build.outputTimestamp>2026-10-15T00:00:00Z</project.build.outputTimestamp>
+        <parser.image.skip>false</parser.image.skip>
         <!-- Compatible security patches; retain Boot/Spring AI/AWS/MCP release lines. -->
         <jackson-bom.version>3.1.7</jackson-bom.version>
         <tomcat.version>11.0.26</tomcat.version>
@@ -147,7 +149,7 @@
             </plugin>
             <plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version>
                 <executions><execution><id>build-isolated-parser</id><phase>process-test-classes</phase><goals><goal>exec</goal></goals>
-                    <configuration><executable>docker</executable><arguments><argument>build</argument><argument>-t</argument><argument>traceback-pdf:m12</argument>
+                    <configuration><skip>${parser.image.skip}</skip><executable>docker</executable><arguments><argument>build</argument><argument>-t</argument><argument>traceback-pdf:m12</argument>
                         <argument>-f</argument><argument>${project.basedir}/../scripts/extraction/Dockerfile</argument><argument>${project.build.directory}</argument>
                     </arguments></configuration>
                 </execution></executions>

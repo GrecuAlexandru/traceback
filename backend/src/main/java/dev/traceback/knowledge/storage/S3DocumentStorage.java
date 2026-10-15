@@ -18,8 +18,13 @@ public class S3DocumentStorage implements DocumentStorage {
     private final String bucket;
     private final int maximumBytes;
     private final boolean readOnly;
+    private final String kmsKey;
     public S3DocumentStorage(S3Client client, String bucket, int maximumBytes, boolean readOnly) {
+        this(client, bucket, maximumBytes, readOnly, "");
+    }
+    public S3DocumentStorage(S3Client client, String bucket, int maximumBytes, boolean readOnly, String kmsKey) {
         this.client = client; this.bucket = bucket; this.maximumBytes = maximumBytes; this.readOnly = readOnly;
+        this.kmsKey = kmsKey;
     }
     @Override public String provider() { return "S3"; }
     static String key(UUID key) { return "documents/" + key; }
@@ -27,10 +32,11 @@ public class S3DocumentStorage implements DocumentStorage {
         if (readOnly) throw new IOException("Worker storage is read-only");
         if (content.length < 1 || content.length > maximumBytes) throw new StorageFailure("CONTENT_LIMIT");
         try {
-            client.putObject(PutObjectRequest.builder().bucket(bucket).key(key(key)).ifNoneMatch("*")
-                    .contentType("application/octet-stream").serverSideEncryption(ServerSideEncryption.AES256)
-                    .checksumSHA256(Base64.getEncoder().encodeToString(HexFormat.of().parseHex(DocumentUploadValidator.checksum(content))))
-                    .build(), RequestBody.fromBytes(content));
+            var request = PutObjectRequest.builder().bucket(bucket).key(key(key)).ifNoneMatch("*")
+                    .contentType("application/octet-stream").serverSideEncryption(kmsKey.isBlank() ? ServerSideEncryption.AES256 : ServerSideEncryption.AWS_KMS)
+                    .checksumSHA256(Base64.getEncoder().encodeToString(HexFormat.of().parseHex(DocumentUploadValidator.checksum(content))));
+            if (!kmsKey.isBlank()) request.ssekmsKeyId(kmsKey);
+            client.putObject(request.build(), RequestBody.fromBytes(content));
         } catch (RuntimeException ex) { throw new IOException("Object upload unavailable"); }
     }
     @Override public byte[] read(UUID key, long maximumBytes) throws IOException {

@@ -64,3 +64,8 @@ See [M11](../M11_DURABLE_INGESTION.md) for exact final verification and commands
 
 
 **CURRENT M12 extension:** ADR-0007 was explicitly approved on 2026-10-14. Verification retains its original lease/meaning; separate indexing uses 90-second renewable token ownership, 30-second DB/SQS heartbeat and ten-minute per-claim deadline. Original revision/provider immutability, read-only legacy worker access and one API writer remain unchanged. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md).
+
+**M17 packaging:** The single API writer/recovery restriction remains deliberate and is
+checked by database ownership, readiness and a second S3-only container refusal test.
+Independent worker leases are preserved. Optional S3-only startup rejects any LOCAL history;
+no immutable provider is rewritten. See [ADR-0011](0011-production-packaging-and-explicit-deployment-blockers.md).

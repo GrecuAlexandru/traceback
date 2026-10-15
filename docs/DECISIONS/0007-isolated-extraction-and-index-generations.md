@@ -57,3 +57,8 @@ One API writer remains required by M10 recovery; multiple independent workers ar
 ## Implementation status
 
 **CURRENT M12:** V7, isolated parser/validation, provider abstraction/Spring AI Ollama, distinct renewable indexing leases, typed M11 queue events, atomic head publication, tenant-scoped keyword/cosine/RRF API and real synthetic evaluation are implemented locally. Milestone review is pending. See [M12](../M12_EXTRACTION_AND_RETRIEVAL.md) for actual limits, schema, event compatibility, source metadata, security tests and final verification evidence. No RAG answers or MCP were added.
+
+**M17 deployment finding:** Containerized API/worker orchestration preserves this parser's
+isolation locally; Fargate cannot run the accepted host-socket/cgroup design unchanged.
+Production extraction is an explicit blocker pending a reviewed runtime/adapter and cloud
+validation. No fallback or limit reduction was introduced. See [M17](../M17_DEPLOYMENT.md).

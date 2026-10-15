@@ -1,0 +1,6 @@
+# Static scanner fixture ONLY. Not deployment inputs or a region/account decision.
+region = "us-east-1"
+account_id = "123456789012"
+availability_zones = ["us-east-1a", "us-east-1b"]
+environment = "demo"
+postgres_version = "17.11"

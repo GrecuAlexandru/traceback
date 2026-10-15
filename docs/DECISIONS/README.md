@@ -23,7 +23,9 @@ ADRs record durable engineering trade-offs. They prevent later AI sessions from 
 
 | [0009](0009-stateless-read-only-mcp.md) | Stateless read-only MCP with independent OAuth resource | Accepted for requested M14 local implementation |
 
-| [0010](0010-nextjs-astryx-and-local-bff-sessions.md) | Next.js/Astryx and local server-managed browser sessions | Accepted for requested M16 local implementation; milestone review pending |
+| [0010](0010-nextjs-astryx-and-local-bff-sessions.md) | Next.js/Astryx and local server-managed browser sessions | Accepted for M16 local implementation; approved by M17 request |
+
+| [0011](0011-production-packaging-and-explicit-deployment-blockers.md) | Production packaging, singleton topology and explicit cloud blockers | Accepted for M17 local work; cloud topology proposed |
 
 ## Creating a new ADR
 
