@@ -1,7 +1,7 @@
 # Traceback — Architecture
 
 **Document status:** Living technical specification.  
-**Baseline inspected:** Local `codex/m15-security-evaluation`, 2026-10-14; M9A–M14 approved for local development. M15 hardening/evaluation is implemented locally; final evidence and review status are recorded in [M15](M15_SECURITY_AND_EVALUATION.md).
+**Baseline inspected:** Local `codex/m16-frontend`, 2026-10-15; M9A–M15 approved for local development by the M16 request. M16 is implemented locally; verification and review status are recorded in [M16](M16_FRONTEND.md).
 **Rule:** Sections labeled **CURRENT** describe code found in the repository; **PLANNED** sections are not implemented claims.
 
 ## 1. Purpose
@@ -12,6 +12,7 @@ The product must remain useful without AI: incident management, knowledge storag
 
 ## 2. Current implementation (verified in repository source)
 
+- **Frontend (M16):** Next.js App Router/React 19/strict TypeScript with pinned Meta Astryx Neutral 0.7.0 and precompiled CSS. Local OIDC Code + S256 PKCE BFF keeps tokens in bounded server memory; browser receives an opaque HttpOnly session. Organization-scoped query providers, incident/document management, keyword/semantic/hybrid search, private persistent chat, live citation resolution, safe Markdown, responsive navigation and light/dark settings are implemented. The existing approved loopback client is reused unchanged. See [M16](M16_FRONTEND.md) and [ADR-0010](DECISIONS/0010-nextjs-astryx-and-local-bff-sessions.md).
 - **Backend:** Java 21 target, Spring Boot 4.1.1, Maven Wrapper (`backend/`).
 - **HTTP API:** `GET /api/v1/ping`, `/api/v1/me`, incident CRUD under `/api/v1/organizations/{organizationId}/incidents` (global incident routes denied), and `POST`/`GET /api/v1/organizations` (M9A).
 - **Incidents:** Organization-owned new incidents; service membership checks and tenant/identity-scoped read/count queries; ADMIN/ENGINEER SQL write predicates; VIEWER read only; pagination/status filtering; version-aware PATCH and DELETE; `@Version` plus atomic SQL compare-and-swap; generic 403/404/409 errors. Repository exposes no unscoped CRUD methods.
@@ -32,10 +33,13 @@ The product must remain useful without AI: incident management, knowledge storag
 
 **CURRENT SECURITY BOUNDARY:** Incident, document and search APIs are tenant-scoped with membership/RBAC enforcement; legacy unassigned incidents are quarantined and global incident routes are denied. Dedicated local PKCE clients and their human/audience mappings are configured; real human, service-account, missing/invalid-signature, and wrong-audience token checks passed for the prior organization/incident baseline. M10 reuses that unchanged authentication configuration and adds simulated-principal authorization tests. Keep the application local pending a separate deployment review. See [LOCAL_KEYCLOAK_SMOKE.md](LOCAL_KEYCLOAK_SMOKE.md) for reproducible setup and exact evidence. See [M9B_INCIDENT_TENANCY.md](M9B_INCIDENT_TENANCY.md).
 
-## 3. Intended architecture (PLANNED)
+## 3. Architecture direction (CURRENT local UI/API; cloud deployment PLANNED)
 
 ```text
-React + TypeScript UI
+Next.js + React + TypeScript + Astryx UI (CURRENT)
+         |
+         v
+Server-managed OIDC session + REST BFF (CURRENT, local single process)
          |
          v
 Spring Boot API  <---->  OIDC identity provider

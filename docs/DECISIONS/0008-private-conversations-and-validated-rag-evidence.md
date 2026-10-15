@@ -83,3 +83,6 @@ rechecked on history/message/citation/replay reads; invalid old answers redact w
 rewriting stored rows. Policy metadata is `commonmark-sources-v1`. Syntactic provenance
 does not establish semantic claim support. Expanded deterministic and bounded live evidence,
 including earlier memory failures, is in [M15](../M15_SECURITY_AND_EVALUATION.md).
+
+
+**CURRENT M16:** M16 preserves non-streaming durable reservation semantics: tab-local UUID-only replay, no automatic write retry/regeneration, pending-only visible polling, explicit stalled new attempts and live citation/history revalidation. No M13 persistence or inference change. See [ADR-0010](0010-nextjs-astryx-and-local-bff-sessions.md) and [M16](../M16_FRONTEND.md).

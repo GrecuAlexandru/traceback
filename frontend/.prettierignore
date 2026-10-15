@@ -1,0 +1,7 @@
+node_modules
+.next
+src/theme/traceback.css
+src/theme/traceback.js
+src/theme/traceback.d.ts
+src/theme/traceback.css.d.ts
+src/theme/traceback.variants.d.ts

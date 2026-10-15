@@ -60,3 +60,6 @@ Keycloak access tokens already expire. Default not-before clock tolerance is pre
 The MCP resource decoder remains independent. A REST-chain 128 KiB mutation body cap and
 validated incident input bounds complement authorization. No identity claims, live realm
 configuration, membership storage or tenant SQL authority changed. See [M15](../M15_SECURITY_AND_EVALUATION.md).
+
+
+**CURRENT M16:** M16 uses server-managed OIDC Code + S256 PKCE sessions and the unchanged approved human REST client. Browser organization/role state is advisory; BFF requests still receive full current backend membership/creator/SQL authorization. No Keycloak configuration change. See [ADR-0010](0010-nextjs-astryx-and-local-bff-sessions.md) and [M16](../M16_FRONTEND.md).

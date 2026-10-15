@@ -55,3 +55,6 @@ presentation gaps and invalid historical answers redact on read. Broader retriev
 deterministic adversarial/RAG and bounded real-model evaluations remain separate from
 authorization evidence. No model tool execution or permission cache is added. See
 [M15](../M15_SECURITY_AND_EVALUATION.md) and ADR-0008 for policy and measured limitations.
+
+
+**CURRENT M16:** M16 renders Markdown without raw HTML/images, resolves citations live, shows redaction/abstention/degraded search and clears organization-scoped client data. It never exposes tokens, runs model tools or changes retrieval/MCP authorization. See [ADR-0010](0010-nextjs-astryx-and-local-bff-sessions.md) and [M16](../M16_FRONTEND.md).

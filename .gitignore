@@ -8,3 +8,10 @@
 # Python smoke-test tooling
 __pycache__/
 *.py[cod]
+
+# Frontend dependencies/builds and local test output
+node_modules/
+.next/
+*.tsbuildinfo
+playwright-report/
+test-results/

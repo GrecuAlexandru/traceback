@@ -23,6 +23,8 @@ ADRs record durable engineering trade-offs. They prevent later AI sessions from 
 
 | [0009](0009-stateless-read-only-mcp.md) | Stateless read-only MCP with independent OAuth resource | Accepted for requested M14 local implementation |
 
+| [0010](0010-nextjs-astryx-and-local-bff-sessions.md) | Next.js/Astryx and local server-managed browser sessions | Accepted for requested M16 local implementation; milestone review pending |
+
 ## Creating a new ADR
 
 Create `NNNN-short-title.md` with:

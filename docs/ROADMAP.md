@@ -1,6 +1,6 @@
 # Traceback — Development Roadmap
 
-**Last source review:** Local `codex/m15-security-evaluation`, 2026-10-14; M9A–M14 approved for local development by the M15 request. M15 implemented locally; review pending. See its verification report for exact evidence.
+**Last source review:** Local `codex/m16-frontend`, 2026-10-15; M9A–M15 approved for local development by the M16 request. M16 is implemented locally; review pending. See its verification report for exact evidence.
 **Execution rule:** Work on **one milestone per agent task**. Do not start the next milestone until the user accepts the previous one.
 
 ## Status definitions
@@ -132,7 +132,7 @@ security review and remaining limits; [ADR-0009](DECISIONS/0009-stateless-read-o
 records transport/OAuth decisions. The M15 request approves M14 locally; its historical
 evaluation and implementation report remain unchanged.
 
-## M15 — Security hardening, AI evaluation and operational readiness — IMPLEMENTED LOCALLY; REVIEW PENDING
+## M15 — Security hardening, AI evaluation and operational readiness — APPROVED for local development
 
 **Delivered:** Markdown-aware citation validation and historical-read protection, strict REST
 expiry and bounded input, targeted dependency patches, source/tenant/auth/commit-recovery
@@ -143,14 +143,23 @@ production exposure. M12/M13 historical results are preserved.
 
 **Evidence:** [M15_SECURITY_AND_EVALUATION.md](M15_SECURITY_AND_EVALUATION.md) records exact
 commands, actual results, pre/post dependency scans, risk register and production gaps.
-Local implementation is ready for user review; this is not production security certification.
-Stop after M15. M16 remains planned and requires separate approval.
+Approved for local development by the M16 request; this is not production security certification. Historical M15 evidence remains unchanged.
 
-## M16 — Minimal React frontend — PLANNED
+## M16 — Full Next.js frontend with Meta Astryx — IMPLEMENTED LOCALLY; REVIEW PENDING
 
-**Deliver:** Login, organization switching, incident management, document library, source search, and AI investigation interface. Use TypeScript; focus on core workflows.
+**Delivered:** Strict TypeScript/React 19 App Router application, pinned Astryx Neutral,
+server-managed Keycloak Code + S256 PKCE and token-free browser sessions, organization
+switching, overview, incident CRUD/conflicts/RBAC, document upload/revisions/lifecycle,
+three search modes, persistent private chat/replay/citations/redaction, settings,
+responsive navigation and coherent light/dark appearance. No backend migration or new
+Keycloak configuration. See [M16_FRONTEND.md](M16_FRONTEND.md) and
+[ADR-0010](DECISIONS/0010-nextjs-astryx-and-local-bff-sessions.md).
 
-**Acceptance:** Critical authenticated user journeys pass browser tests and respect access control.
+**Acceptance evidence:** Frontend type/lint/unit/build/browser and accessibility checks;
+real local browser-to-Keycloak/backend organization/incident/document/index/search/chat/
+citation/source-supersession smoke with disposable data. The report distinguishes actual
+real-service evidence from deterministic OIDC/REST fixtures and records limitations.
+M16 requires user review before M17; no production deployment approval is implied.
 
 ## M17 — Packaging, deployment, and portfolio release — PLANNED
 

@@ -37,3 +37,6 @@ Use one Java/Spring Boot codebase organized by business feature. Controllers, se
 
 
 **CURRENT M13:** Private persistent conversations, durable/idempotent ordered turns, bounded local inference and assigned-source citation validation are implemented in `rag` with append-only V8. All supplied and inherited source dependencies are checked against current authorization/publication before generation, finalization and historical reads; invalid historical answers are redacted. No tools or MCP. See [ADR-0008](0008-private-conversations-and-validated-rag-evidence.md) and [M13](../M13_RAG_CHAT.md).
+
+
+**CURRENT M16:** M16 adds a separate local Next.js/Astryx presentation and REST BFF process. Business services, storage, retrieval and inference remain in the Java modular monolith; no new backend service or schema. See [ADR-0010](0010-nextjs-astryx-and-local-bff-sessions.md) and [M16](../M16_FRONTEND.md).

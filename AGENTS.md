@@ -96,3 +96,24 @@ End each completed task with:
 - **Security/data review** — tenant boundaries, credentials, backwards compatibility.
 - **Open issues / assumptions** — clear blockers, no invented verification.
 - **Next checkpoint** — one recommended milestone; do not implement it yet.
+
+
+## Frontend conventions (M16)
+
+- `frontend/`: Next.js App Router, React 19+, strict TypeScript and Meta Astryx Neutral.
+  Preserve backend guidance above. Read frontend/AGENTS.md and docs/M16_FRONTEND.md.
+- Use pinned official Astryx components and inspect actual CLI APIs; no competing UI
+  library. Keep precompiled CSS and regenerate/check the Traceback theme with the CLI.
+- OIDC tokens remain server-only. Fixed-origin BFF writes require Origin/custom-header
+  CSRF checks; do not weaken JWTs, CORS, route allowlists or body/deadline bounds.
+- Every query key includes organization. Cancel/clear tenant query clients and replay
+  handles on switch/logout. Persist only appearance and opaque tab-local replay UUIDs.
+- Render model Markdown without raw HTML/images. Resolve citations through their live
+  conversation/message/reference endpoint; never reuse cached source excerpts.
+- Send versions for incident/document writes; reload explicitly on conflicts. Never
+  retry a generation with a new key automatically or simulate streaming/upload progress.
+- From frontend/: npm ci; npm run typecheck; npm run lint; npm run test; npm run build;
+  npm run test:e2e. Playwright uses only isolated OIDC/REST fixtures on ports 8768/18090.
+  Real Keycloak/backend smoke is separate, with synthetic disposable data.
+- Visually inspect major screens, mobile navigation and both themes after UI changes.
+  Keep screenshots/logs outside the checkout and never save credentials in artifacts.
